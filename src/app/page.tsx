@@ -35,9 +35,10 @@ export default async function HomePage() {
 
         <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(plants as Plant[] | null)?.map((plant) => (
-            <div
+            <Link
               key={plant.id}
-              className="rounded-2xl border bg-white p-5 shadow-sm"
+              href={`/plants/${plant.id}`}
+              className="rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <h2 className="text-xl font-semibold">{plant.name}</h2>
               <p className="mt-2 text-sm text-stone-600">
@@ -52,7 +53,7 @@ export default async function HomePage() {
               {plant.notes && (
                 <p className="mt-3 text-sm text-stone-700">{plant.notes}</p>
               )}
-            </div>
+            </Link>
           ))}
         </section>
       </div>
