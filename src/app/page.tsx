@@ -1,5 +1,6 @@
-import { supabase } from "../src/lib/supabase";
-import type { Plant } from "../src/types/plant";
+import Link from "next/link";
+import { supabase } from "../lib/supabase";
+import type { Plant } from "../types/plant";
 
 export default async function HomePage() {
   const { data: plants, error } = await supabase
@@ -10,10 +11,21 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900 p-8">
       <div className="mx-auto max-w-5xl">
-        <h1 className="text-4xl font-bold tracking-tight">AvoLog</h1>
-        <p className="mt-3 text-lg text-stone-600">
-          Track your avocado squad, water changes, growth, and photos.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">AvoLog</h1>
+            <p className="mt-3 text-lg text-stone-600">
+              Track your avocado squad, water changes, growth, and photos.
+            </p>
+          </div>
+
+          <Link
+            href="/plants/new"
+            className="rounded-xl bg-stone-900 px-4 py-3 text-white transition hover:opacity-90"
+          >
+            Add Plant
+          </Link>
+        </div>
 
         {error && (
           <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
