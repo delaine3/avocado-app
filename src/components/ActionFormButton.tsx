@@ -1,0 +1,116 @@
+"use client";
+
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import type { ActionResult } from "../app/actions/plant-actions";
+
+type HiddenField = {
+  name: string;
+  value: string | number;
+};
+
+type Props = {
+  action: (
+    prevState: ActionResult | null,
+    formData: FormData,
+  ) => Promise<ActionResult>;
+  hiddenFields: HiddenField[];
+  title: string;
+  description?: React.ReactNode;
+  redirectTo?: string;
+  className?: string;
+  children: React.ReactNode;
+};
+
+export default function ActionFormButton({
+  action,
+  hiddenFields,
+  title,
+  description = "This action cannot be undone.",
+  redirectTo,
+  className,
+  children,
+}: Props) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const [state, formAction, pending] = useActionState(action, null);
+
+  useEffect(() => {
+    if (!state) return;
+
+    if (state.ok) {
+      toast.success(state.message);
+      setOpen(false);
+
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
+    } else {
+      toast.error(state.message);
+    }
+  }, [state, router, redirectTo]);
+
+  return (
+    <>
+      <button
+        type="button"
+        className={
+          className +
+          " inline-flex items-center gap-2 rounded-xl px-4 py-2 my-2 mx-2  font-medium text-red-700 transition hover:bg-red-50"
+        }
+        style={{ color: "#586b20", backgroundColor: "#a5b760" }}
+        aria-label="Delete care log"
+        onClick={() => setOpen(true)}
+      >
+        {children}
+      </button>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-xl font-semibold ">{title}</h3>
+
+            <p className="mt-2  ">{description}</p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="cancel-button"
+              >
+                Cancel
+              </button>
+
+              <form action={formAction}>
+                {hiddenFields.map((field) => (
+                  <input
+                    key={field.name}
+                    type="hidden"
+                    name={field.name}
+                    value={field.value}
+                  />
+                ))}
+
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="delete-button"
+                >
+                  {pending ? "Deleting..." : "Delete"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

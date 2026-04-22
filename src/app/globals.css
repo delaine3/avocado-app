@@ -24,3 +24,130 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  text-align: center;
+  max-width: 42rem;
+}
+.page {
+  background-color: #bed582;
+  color: #341705;
+}
+.title {
+  font-size: 3.3rem;
+  font-weight: 700;
+  color: #4a2c14;
+  margin-top: 16px;
+  letter-spacing: 0.03em;
+}
+.title-sm {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #4a2c14;
+  letter-spacing: 0.03em;
+}
+
+.submit-button {
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #8fab45, #566729);
+  border: solid 1px #e7ded8;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.submit-button:active {
+  transform: translateY(1px);
+}
+.delete-button {
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    #c05252,
+    #c05d52,
+    #b8483d,
+    #9e2f23,
+    #9e2323,
+    #b02727
+  );
+  border: solid 1px #e7ded8;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+.delete-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+.delete-button:active {
+  transform: translateY(1px);
+}
+.cancel-button {
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    #a8d5e5,
+    #92cbdf,
+    #7cc0d8,
+    #51abcb,
+    #3ba1c5,
+    #2596be
+  );
+  border: solid 1px #e7ded8;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.cancel-button:active {
+  transform: translateY(1px);
+}
+.create-button {
+  border-radius: 0.75rem;
+  background: linear-gradient(147deg, #4a2c14, #5c412c);
+
+  border: solid 1px #4a2c14;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.create-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.create-button:active {
+  transform: translateY(1px);
+}
+.field-form {
+  background: linear-gradient(147deg, #dde6c7, #f4f7ec, #e9eeda);
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border: 1px solid rgb(231 229 228);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  width: 50%;
+  margin: auto;
+}

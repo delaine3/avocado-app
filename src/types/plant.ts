@@ -16,4 +16,5 @@ export interface Plant {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  label?: string;
 }

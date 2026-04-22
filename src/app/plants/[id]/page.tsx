@@ -1,7 +1,20 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { supabase } from "../../../lib/supabase";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import type { Plant } from "../../../types/plant";
+import type { CareLog } from "../../../types/care-log";
+import {
+  deleteCareLog,
+  updateCareLog,
+  updatePlant,
+} from "../../../app/actions/plant-actions";
+import { Trash2 } from "lucide-react";
+import ActionFormButton from "@/src/components/ActionFormButton";
+import EditCareLogButton from "@/src/components/EditCareLogButton";
+import EditPlantButton from "@/src/components/EditPlantButton";
+import { toTitleCase } from "../../utilities/format";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -9,101 +22,310 @@ interface PlantDetailPageProps {
   }>;
 }
 
+async function createCareLog(formData: FormData) {
+  "use server";
+
+  const supabase = createSupabaseServerClient();
+
+  const plantId = formData.get("plant_id")?.toString();
+  const actionType = formData.get("action_type")?.toString();
+  const actionDate = formData.get("action_date")?.toString();
+  const notes = formData.get("notes")?.toString().trim() || null;
+
+  if (!plantId || !actionType || !actionDate) {
+    throw new Error("Plant ID, action type, and action date are required.");
+  }
+
+  const { error } = await supabase.from("care_logs").insert({
+    plant_id: Number(plantId),
+    action_type: actionType,
+    action_date: actionDate,
+    notes,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/plants/${plantId}`);
+  redirect(`/plants/${plantId}`);
+}
+
+function getLogTypeMeta(actionType: string) {
+  switch (actionType) {
+    case "water_change":
+      return {
+        label: "Water Change",
+        className: "bg-[#d9ecff] text-[#1f5f99]",
+        icon: "💧",
+      };
+
+    case "root_growth":
+      return {
+        label: "Root Growth",
+        className: "bg-[#e7d4bf] text-[#6b4226]",
+        icon: "🤎",
+      };
+
+    case "leaf_growth":
+      return {
+        label: "Leaf Growth",
+        className: "bg-[#dff2c2] text-[#3d6b1f]",
+        icon: "🍃",
+      };
+
+    case "seed_crack":
+      return {
+        label: "Seed Crack",
+        className: "bg-[#f3e2b8] text-[#8a5a13]",
+        icon: "🥑",
+      };
+
+    case "general_update":
+      return {
+        label: "General Update",
+        className: "bg-[#ece7dc] text-[#5c4a34]",
+        icon: "📝",
+      };
+
+    default:
+      return {
+        label: actionType.replaceAll("_", " "),
+        className: "bg-[#f3efe6] text-[#5f5648]",
+        icon: "📘",
+      };
+  }
+}
 export default async function PlantDetailPage({
   params,
 }: PlantDetailPageProps) {
   const { id } = await params;
 
-  const { data: plant, error } = await supabase
-    .from("plants")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [
+    { data: plant, error: plantError },
+    { data: careLogs, error: careLogsError },
+  ] = await Promise.all([
+    supabase.from("plants").select("*").eq("id", id).single(),
+    supabase
+      .from("care_logs")
+      .select("*")
+      .eq("plant_id", id)
+      .order("action_date", { ascending: false }),
+  ]);
 
-  if (error || !plant) {
+  if (plantError || !plant) {
     notFound();
   }
 
   const typedPlant = plant as Plant;
+  const typedCareLogs = (careLogs ?? []) as CareLog[];
 
   return (
-    <main className="min-h-screen bg-stone-50 px-6 py-10 text-stone-900">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="text-sm text-stone-600 underline underline-offset-4"
-          >
-            ← Back to dashboard
-          </Link>
+    <main className="min-h-screen bg-stone-50 px-6 py-10  page">
+      <Link href="/" className="  underline underline-offset-4">
+        ← Back to dashboard
+      </Link>
+      <div className="page-header mb-6"></div>
+      <div className="page-header">
+        <h1 className="title"> Plant Profile</h1>
+
+        <h1 className="title-sm">{typedPlant.name}</h1>
+        <p className="">{typedPlant.notes ?? "No notes yet."}</p>
+      </div>
+      <div className="field-form">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div className="rounded-2xl px-4 ml-auto flex flex-col items-end gap-3">
+            <div className="mt-4 rounded-xl border border-stone-300 px-4 py-2 font-medium bg-stone-50">
+              <span className="font-bold">Stage: </span>
+              <span className="font-medium">
+                {toTitleCase(typedPlant.stage)}
+              </span>
+            </div>
+            <EditPlantButton
+              action={updatePlant}
+              plant={{
+                id: typedPlant.id,
+                name: typedPlant.name,
+                started_at: typedPlant.started_at,
+                stage: typedPlant.stage,
+                location: typedPlant.location,
+                container_type: typedPlant.container_type,
+                notes: typedPlant.notes,
+                label: "Edit Plant",
+              }}
+            />
+            Edit Plant
+          </div>
         </div>
 
-        <div className="rounded-3xl border bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-stone-500">
-                Plant Profile
-              </p>
-              <h1 className="mt-2 text-4xl font-bold tracking-tight">
-                {typedPlant.name}
-              </h1>
-              <p className="mt-3 text-stone-600">
-                {typedPlant.notes ?? "No notes yet."}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-stone-100 px-4 py-3 text-sm text-stone-700">
-              Stage: <span className="font-medium">{typedPlant.stage}</span>
-            </div>
+        <section className="mt-10 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Started</h2>
+            <p className="mt-2 ">{typedPlant.started_at ?? "Not set"}</p>
           </div>
 
-          <section className="mt-10 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Started</h2>
-              <p className="mt-2 text-stone-600">
-                {typedPlant.started_at ?? "Not set"}
-              </p>
-            </div>
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Location</h2>
+            <p className="mt-2 ">{typedPlant.location ?? "Not set"}</p>
+          </div>
 
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Location</h2>
-              <p className="mt-2 text-stone-600">
-                {typedPlant.location ?? "Not set"}
-              </p>
-            </div>
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Container Type</h2>
+            <p className="mt-2 ">{typedPlant.container_type ?? "Not set"}</p>
+          </div>
 
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Container Type</h2>
-              <p className="mt-2 text-stone-600">
-                {typedPlant.container_type ?? "Not set"}
-              </p>
-            </div>
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Created</h2>
+            <p className="mt-2 ">
+              {new Date(typedPlant.created_at).toLocaleDateString()}
+            </p>
+          </div>
+        </section>
 
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Created</h2>
-              <p className="mt-2 text-stone-600">
-                {new Date(typedPlant.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          </section>
+        <section className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Add Care Log</h2>
 
-          <section className="mt-10 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Water Logs</h2>
-              <p className="mt-2 text-sm text-stone-600">
-                Coming next. This is where water changes and care events will
-                appear.
-              </p>
-            </div>
+            <form action={createCareLog} className="mt-4 space-y-4">
+              <input type="hidden" name="plant_id" value={typedPlant.id} />
+              <div>
+                <label
+                  htmlFor="action_type"
+                  className="mb-2 block  font-medium"
+                >
+                  Log Type
+                </label>
+                <select
+                  id="action_type"
+                  name="action_type"
+                  required
+                  defaultValue="water_change"
+                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                >
+                  <option value="water_change">Water Change</option>
+                  <option value="root_growth">Root Growth</option>
+                  <option value="leaf_growth">Leaf Growth</option>
+                  <option value="seed_crack">Seed Crack</option>
+                  <option value="general_update">General Update</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="action_date"
+                  className="mb-2 block  font-medium"
+                >
+                  Care Date
+                </label>
+                <input
+                  id="action_date"
+                  name="action_date"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  type="date"
+                  required
+                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                />
+              </div>
 
-            <div className="rounded-2xl border p-5">
-              <h2 className="text-lg font-semibold">Photo Journal</h2>
-              <p className="mt-2 text-sm text-stone-600">
-                Coming next. This is where progress photos will live.
+              <div>
+                <label htmlFor="notes" className="mb-2 block  font-medium">
+                  Notes
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  rows={3}
+                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                  placeholder="Fresh water, roots looked bright white, tiny crack widening."
+                />
+              </div>
+
+              <button type="submit" className="submit-button">
+                Save Care Log
+              </button>
+            </form>
+          </div>
+          <div className="rounded-2xl border p-5 h-[32rem] flex flex-col">
+            <h2 className="text-lg font-semibold">Care History</h2>
+            {careLogsError && (
+              <p className="mt-3  text-red-600">
+                Failed to load care logs: {careLogsError.message}
               </p>
-            </div>
-          </section>
-        </div>
+            )}
+            {typedCareLogs.length === 0 ? (
+              <p className="mt-3  ">No care logs yet.</p>
+            ) : (
+              <div className="mt-4 flex-1 overflow-y-auto pr-2">
+                <div className="space-y-3">
+                  {typedCareLogs.map((log) => {
+                    const logMeta = getLogTypeMeta(log.action_type);
+
+                    return (
+                      <div
+                        key={log.id}
+                        className="rounded-xl p-4 space-y-2"
+                        style={{ background: "rgba(37, 149, 190, 0.31)" }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${logMeta.className}`}
+                          >
+                            <span className=" leading-none">
+                              {logMeta.icon}
+                            </span>
+                            {logMeta.label}
+                          </span>
+
+                          <div className="flex items-center gap-3">
+                            <EditCareLogButton
+                              action={updateCareLog}
+                              log={{
+                                id: log.id,
+                                plant_id: typedPlant.id,
+                                action_type: log.action_type,
+                                action_date: log.action_date,
+                                notes: log.notes,
+                                icon: true,
+                              }}
+                            />
+
+                            <ActionFormButton
+                              action={deleteCareLog}
+                              hiddenFields={[
+                                { name: "log_id", value: log.id },
+                                { name: "plant_id", value: typedPlant.id },
+                              ]}
+                              title="Delete this care log?"
+                              description="This action cannot be undone."
+                            >
+                              <Trash2 size={16} />
+                            </ActionFormButton>
+                          </div>
+                        </div>
+                        <div style={{ color: "#2596be" }}>
+                          <p className=" font-medium ">
+                            {new Date(log.action_date).toLocaleDateString()}
+                          </p>
+                          <p className=" ">
+                            {log.notes ?? "No notes recorded."}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="rounded-2xl border p-5">
+            <h2 className="text-lg font-semibold">Photo Journal</h2>
+            <p className="mt-2  ">
+              Coming next. This is where progress photos will live.
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );
