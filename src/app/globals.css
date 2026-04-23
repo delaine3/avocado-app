@@ -151,3 +151,13 @@ body {
   width: 50%;
   margin: auto;
 }
+.plant-label {
+  margin-right: 0.45rem;
+  color: #6b5a46;
+  font-weight: 600;
+}
+
+.plant-name-value {
+  color: #4a2c14;
+  font-weight: 800;
+}

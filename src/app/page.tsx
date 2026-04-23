@@ -3,12 +3,7 @@ import type { Plant } from "../types/plant";
 import { createSupabaseServerClient } from "../lib/supabase-server";
 import { Trash2 } from "lucide-react";
 import ActionFormButton from "../components/ActionFormButton";
-import {
-  deletePlant,
-  updateCareLog,
-  updatePlant,
-} from "./actions/plant-actions";
-import { Pencil } from "lucide-react";
+import { deletePlant, updatePlant } from "./actions/plant-actions";
 import EditPlantButton from "../components/EditPlantButton";
 import { toTitleCase } from "./utilities/format";
 export default async function HomePage() {
