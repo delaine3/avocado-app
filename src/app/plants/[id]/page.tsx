@@ -31,9 +31,34 @@ async function createCareLog(formData: FormData) {
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
+  const photo = formData.get("photo") as File | null;
 
   if (!plantId || !actionType || !actionDate) {
     throw new Error("Plant ID, action type, and action date are required.");
+  }
+
+  let photoUrl: string | null = null;
+
+  if (photo && photo.size > 0) {
+    const fileExt = photo.name.split(".").pop();
+    const filePath = `${plantId}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("care-log-photos")
+      .upload(filePath, photo, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data } = supabase.storage
+      .from("care-log-photos")
+      .getPublicUrl(filePath);
+
+    photoUrl = data.publicUrl;
   }
 
   const { error } = await supabase.from("care_logs").insert({
@@ -41,6 +66,7 @@ async function createCareLog(formData: FormData) {
     action_type: actionType,
     action_date: actionDate,
     notes,
+    photo_url: photoUrl,
   });
 
   if (error) {
@@ -240,7 +266,16 @@ export default async function PlantDetailPage({
                   placeholder="Fresh water, roots looked bright white, tiny crack widening."
                 />
               </div>
-
+              <div className="rounded-2xl">
+                <label className="mb-2 block  font-medium">Photo Journal</label>
+                <input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  accept="image/*"
+                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                />
+              </div>
               <button type="submit" className="submit-button">
                 Save Care Log
               </button>
@@ -311,21 +346,19 @@ export default async function PlantDetailPage({
                             {log.notes ?? "No notes recorded."}
                           </p>
                         </div>
+                        {log.photo_url && (
+                          <img
+                            src={log.photo_url}
+                            alt={`Care log photo for ${typedPlant.name}`}
+                            className="mt-3 h-100 w-full rounded-2xl object-cover"
+                          />
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
             )}
-          </div>
-        </section>
-
-        <section className="mt-10">
-          <div className="rounded-2xl border p-5">
-            <h2 className="text-lg font-semibold">Photo Journal</h2>
-            <p className="mt-2  ">
-              Coming next. This is where progress photos will live.
-            </p>
           </div>
         </section>
       </div>

@@ -73,18 +73,54 @@ export async function updateCareLog(
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
+  const photo = formData.get("photo") as File | null;
 
   if (!logId || !plantId || !actionType || !actionDate) {
     return { ok: false, message: "Missing required fields." };
   }
 
+  let photoUrl: string | null = null;
+
+  if (photo && photo.size > 0) {
+    const fileExt = photo.name.split(".").pop();
+    const filePath = `${plantId}/${logId}-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("care-log-photos")
+      .upload(filePath, photo, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (uploadError) {
+      return { ok: false, message: uploadError.message };
+    }
+
+    const { data } = supabase.storage
+      .from("care-log-photos")
+      .getPublicUrl(filePath);
+
+    photoUrl = data.publicUrl;
+  }
+
+  const updatePayload: {
+    action_type: string;
+    action_date: string;
+    notes: string | null;
+    photo_url?: string | null;
+  } = {
+    action_type: actionType,
+    action_date: actionDate,
+    notes,
+  };
+
+  if (photoUrl) {
+    updatePayload.photo_url = photoUrl;
+  }
+
   const { error } = await supabase
     .from("care_logs")
-    .update({
-      action_type: actionType,
-      action_date: actionDate,
-      notes,
-    })
+    .update(updatePayload)
     .eq("id", Number(logId));
 
   if (error) {

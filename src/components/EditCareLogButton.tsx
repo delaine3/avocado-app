@@ -18,6 +18,7 @@ type EditCareLogButtonProps = {
     notes: string | null;
     label?: string | null;
     icon?: boolean | true;
+    photo_url?: string | null;
   };
 };
 
@@ -128,7 +129,23 @@ export default function EditCareLogButton({
                   placeholder="Roots looked brighter, crack widened, stem tilted upward..."
                 />
               </div>
-
+              <div className="rounded-2xl">
+                <label className="mb-2 block  font-medium">Photo Journal</label>
+                <input
+                  id="photo"
+                  name="photo"
+                  type="file"
+                  accept="image/*"
+                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                />
+              </div>
+              {log.photo_url && (
+                <img
+                  src={log.photo_url}
+                  alt="Current care log photo"
+                  className="mb-3 h-40 w-full rounded-2xl object-cover"
+                />
+              )}
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
