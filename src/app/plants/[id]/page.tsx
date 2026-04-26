@@ -147,7 +147,7 @@ export default async function PlantDetailPage({
   const typedCareLogs = (careLogs ?? []) as CareLog[];
 
   return (
-    <main className="min-h-screen bg-stone-50 px-6 py-10  page">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <Link href="/" className="  underline underline-offset-4">
         ← Back to dashboard
       </Link>
@@ -164,7 +164,7 @@ export default async function PlantDetailPage({
             <span className="plant-label">Plant Name:</span>
             <span className="plant-name-value">{typedPlant.name}</span>
           </h1>
-          <div className="rounded-2xl px-4 ml-auto flex flex-col items-end gap-3">
+          <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
             <div className="mt-4 rounded-xl border border-stone-300 px-4 py-2 font-medium bg-stone-50">
               <span className="font-bold">Stage: </span>
               <span className="font-medium">
@@ -186,22 +186,20 @@ export default async function PlantDetailPage({
           </div>
         </div>
 
-        <section className="mt-10 grid gap-4 sm:grid-cols-2">
+        <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {" "}
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
             <p className="mt-2 ">{typedPlant.started_at ?? "Not set"}</p>
           </div>
-
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Location</h2>
             <p className="mt-2 ">{typedPlant.location ?? "Not set"}</p>
           </div>
-
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2 ">{typedPlant.container_type ?? "Not set"}</p>
           </div>
-
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Created</h2>
             <p className="mt-2 ">
@@ -210,7 +208,8 @@ export default async function PlantDetailPage({
           </div>
         </section>
 
-        <section className="mt-10 grid gap-6 md:grid-cols-2">
+        <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {" "}
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Add Care Log</h2>
 
@@ -281,7 +280,7 @@ export default async function PlantDetailPage({
               </button>
             </form>
           </div>
-          <div className="rounded-2xl border p-5 h-[32rem] flex flex-col">
+          <div className="flex h-[28rem] flex-col rounded-2xl border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
             {careLogsError && (
               <p className="mt-3  text-red-600">
@@ -302,17 +301,16 @@ export default async function PlantDetailPage({
                         className="rounded-xl p-4 space-y-2"
                         style={{ background: "rgba(37, 149, 190, 0.31)" }}
                       >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${logMeta.className}`}
+                            className={`inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:px-3 sm:text-xs font-semibold uppercase tracking-normal sm:tracking-wide whitespace-nowrap ${logMeta.className}`}
                           >
                             <span className=" leading-none">
                               {logMeta.icon}
                             </span>
                             {logMeta.label}
                           </span>
-
-                          <div className="flex items-center gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
                             <EditCareLogButton
                               action={updateCareLog}
                               log={{
@@ -324,7 +322,6 @@ export default async function PlantDetailPage({
                                 icon: true,
                               }}
                             />
-
                             <ActionFormButton
                               action={deleteCareLog}
                               hiddenFields={[
@@ -350,7 +347,7 @@ export default async function PlantDetailPage({
                           <img
                             src={log.photo_url}
                             alt={`Care log photo for ${typedPlant.name}`}
-                            className="mt-3 h-100 w-full rounded-2xl object-cover"
+                            className="mt-3 h-56 w-full rounded-2xl object-cover sm:h-80"
                           />
                         )}
                       </div>

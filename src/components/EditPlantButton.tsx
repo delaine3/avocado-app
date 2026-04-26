@@ -60,18 +60,20 @@ export default function EditPlantButton({
       {open && (
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div
-            className="w-full max-w-2xl rounded-3xl p-6 shadow-2xl "
-            style={{ backgroundColor: "#ffffff88" }}
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-4 shadow-2xl sm:p-6"
+            style={{ backgroundColor: "#fffaf1" }}
             onClick={(event) => event.stopPropagation()}
           >
-            <h3 className="text-xl font-semibold">Edit Plant</h3>
+            <h3 className="text-lg font-semibold sm:text-xl">Edit Plant</h3>
 
-            <p className="mt-2 ">Update your avocado profile.</p>
+            <p className="mt-2 text-sm sm:text-base">
+              Update your avocado profile.
+            </p>
 
-            <form action={formAction} className="mt-6 space-y-4">
+            <form action={formAction} className="mt-5 space-y-4 sm:mt-6">
               <input type="hidden" name="plant_id" value={plant.id} />
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label
                     htmlFor={`name_${plant.id}`}
@@ -181,11 +183,11 @@ export default function EditPlantButton({
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="cancel-button"
+                  className="cancel-button w-full sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -193,7 +195,7 @@ export default function EditPlantButton({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="submit-button"
+                  className="submit-button w-full sm:w-auto"
                 >
                   {pending ? "Saving..." : "Save Changes"}
                 </button>
