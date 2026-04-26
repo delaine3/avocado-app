@@ -6,6 +6,9 @@ import ActionFormButton from "../components/ActionFormButton";
 import { deletePlant, updatePlant } from "./actions/plant-actions";
 import EditPlantButton from "../components/EditPlantButton";
 import { toTitleCase } from "./utilities/format";
+import BulkCareLogForm from "../components/BulkCareLogForm";
+import { createCareLogForAllPlants } from "./actions/plant-actions";
+
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
 
@@ -24,7 +27,7 @@ export default async function HomePage() {
               Track your avocado squad, water changes, growth, and photos.
             </p>
           </div>
-
+          <BulkCareLogForm action={createCareLogForAllPlants} />
           <Link href="/plants/new" className="create-button">
             Add Plant
           </Link>

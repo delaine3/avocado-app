@@ -61,10 +61,9 @@ export default function EditPlantButton({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 md:py-10 backdrop-blur-sm"
           onClick={() => setOpen(false)}
-          style={{ backgroundColor: "#bed582" }}
         >
           <div
-            className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-2xl rounded-3xl p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-xl font-semibold">Edit Plant</h3>

@@ -135,3 +135,53 @@ export async function updatePlant(
 
   return { ok: true, message: "Plant updated." };
 }
+export async function createCareLogForAllPlants(
+  _prevState: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const supabase = createSupabaseServerClient();
+
+  const actionType = formData.get("action_type")?.toString();
+  const actionDate = formData.get("action_date")?.toString();
+  const notes = formData.get("notes")?.toString().trim() || null;
+
+  if (!actionType || !actionDate) {
+    return { ok: false, message: "Log type and date are required." };
+  }
+
+  const { data: plants, error: plantsError } = await supabase
+    .from("plants")
+    .select("id");
+
+  if (plantsError) {
+    return { ok: false, message: plantsError.message };
+  }
+
+  if (!plants || plants.length === 0) {
+    return { ok: false, message: "No plants found." };
+  }
+
+  const logsToInsert = plants.map((plant) => ({
+    plant_id: plant.id,
+    action_type: actionType,
+    action_date: actionDate,
+    notes,
+  }));
+
+  const { error } = await supabase.from("care_logs").insert(logsToInsert);
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  revalidatePath("/");
+
+  for (const plant of plants) {
+    revalidatePath(`/plants/${plant.id}`);
+  }
+
+  return {
+    ok: true,
+    message: `Care log added to ${plants.length} plants.`,
+  };
+}
