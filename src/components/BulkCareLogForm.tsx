@@ -38,13 +38,11 @@ export default function BulkCareLogForm({ action }: Props) {
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 md:py-10 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
-        >
+        <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div
             className="w-full max-w-2xl rounded-3xl p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
+            style={{ backgroundColor: "#ffffff88" }}
           >
             <h2 className="modal-title text-2xl">Add Log To All Plants</h2>
 

@@ -58,12 +58,10 @@ export default function EditPlantButton({
       </button>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 md:py-10 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
-        >
+        <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div
-            className="w-full max-w-2xl rounded-3xl p-6 shadow-2xl"
+            className="w-full max-w-2xl rounded-3xl p-6 shadow-2xl "
+            style={{ backgroundColor: "#ffffff88" }}
             onClick={(event) => event.stopPropagation()}
           >
             <h3 className="text-xl font-semibold">Edit Plant</h3>
