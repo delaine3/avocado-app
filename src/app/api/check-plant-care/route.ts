@@ -2,7 +2,12 @@ import { Resend } from "resend";
 import { createSupabaseServerClient } from "@/src/lib/supabase-server";
 
 export async function GET(req: Request) {
-  if (req.headers.get("x-vercel-cron") !== "1") {
+  const { searchParams } = new URL(req.url);
+
+  const isCron = req.headers.get("x-vercel-cron") === "1";
+  const isManualTest = searchParams.get("test") === "true";
+
+  if (!isCron && !isManualTest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
