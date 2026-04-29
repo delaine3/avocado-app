@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type PlantOption = {
@@ -8,7 +8,7 @@ type PlantOption = {
   name: string;
 };
 
-type PlantTypeaheadSelectProps = {
+type Props = {
   plants: PlantOption[];
   currentPlantId: number;
 };
@@ -16,36 +16,47 @@ type PlantTypeaheadSelectProps = {
 export default function PlantTypeaheadSelect({
   plants,
   currentPlantId,
-}: PlantTypeaheadSelectProps) {
+}: Props) {
   const router = useRouter();
 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const filteredPlants = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const q = query.trim().toLowerCase();
+    if (!q) return plants;
 
-    if (!normalizedQuery) {
-      return plants;
-    }
-
-    return plants.filter((plant) =>
-      plant.name.toLowerCase().includes(normalizedQuery),
-    );
+    return plants.filter((p) => p.name.toLowerCase().includes(q));
   }, [plants, query]);
 
+  // 👇 THIS is the important part
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current) return;
+
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative w-full max-w-md">
-      <label htmlFor="plant-search" className="mb-2 block font-medium">
-        Jump to Plant
-      </label>
+    <div ref={containerRef} className="relative w-full max-w-md">
+      <label className="mb-2 block font-medium">Jump to Plant</label>
 
       <input
-        id="plant-search"
         type="text"
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
         onFocus={() => setOpen(true)}
+        onChange={(e) => setQuery(e.target.value)}
         placeholder="Search avocado..."
         className="w-full rounded-xl border px-4 py-3 outline-none"
       />
@@ -64,7 +75,7 @@ export default function PlantTypeaheadSelect({
                   setOpen(false);
                   router.push(`/plants/${plant.id}`);
                 }}
-                className="block w-full px-4 py-3 text-left text-sm hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="block w-full px-4 py-3 text-left text-sm hover:bg-stone-100 disabled:opacity-50"
               >
                 {plant.name}
                 {plant.id === currentPlantId ? " · Current" : ""}
