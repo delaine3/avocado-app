@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { createSupabaseServerClient } from "@/src/lib/supabase-server";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
