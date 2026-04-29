@@ -15,6 +15,7 @@ import ActionFormButton from "@/src/components/ActionFormButton";
 import EditCareLogButton from "@/src/components/EditCareLogButton";
 import EditPlantButton from "@/src/components/EditPlantButton";
 import { toTitleCase } from "../../utilities/format";
+import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -130,6 +131,7 @@ export default async function PlantDetailPage({
   const [
     { data: plant, error: plantError },
     { data: careLogs, error: careLogsError },
+    { data: allPlants, error: allPlantsError },
   ] = await Promise.all([
     supabase.from("plants").select("*").eq("id", id).single(),
     supabase
@@ -137,6 +139,10 @@ export default async function PlantDetailPage({
       .select("*")
       .eq("plant_id", id)
       .order("action_date", { ascending: false }),
+    supabase
+      .from("plants")
+      .select("id, name")
+      .order("name", { ascending: true }),
   ]);
 
   if (plantError || !plant) {
@@ -145,7 +151,12 @@ export default async function PlantDetailPage({
 
   const typedPlant = plant as Plant;
   const typedCareLogs = (careLogs ?? []) as CareLog[];
-
+  const plantOptions = (
+    (allPlants ?? []) as { id: number; name: string }[]
+  ).map((plant) => ({
+    id: plant.id,
+    name: plant.name,
+  }));
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <Link href="/" className="  underline underline-offset-4">
@@ -162,7 +173,7 @@ export default async function PlantDetailPage({
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <h1 className="title-sm">
             <span className="plant-label">Plant Name:</span>
-            <span className="plant-name-value">{typedPlant.name}</span>
+            <span className="plant-name-value">{typedPlant.name}🌱🥑</span>
           </h1>
           <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
             <div className="mt-4 rounded-xl border border-stone-300 px-4 py-2 font-medium bg-stone-50">
@@ -183,6 +194,12 @@ export default async function PlantDetailPage({
                 notes: typedPlant.notes,
               }}
             />
+            <div className="mt-4">
+              <PlantTypeaheadSelect
+                plants={plantOptions}
+                currentPlantId={typedPlant.id}
+              />
+            </div>
           </div>
         </div>
 
@@ -315,6 +332,7 @@ export default async function PlantDetailPage({
                               action={updateCareLog}
                               log={{
                                 id: log.id,
+                                plant_name: typedPlant.name,
                                 plant_id: typedPlant.id,
                                 action_type: log.action_type,
                                 action_date: log.action_date,
@@ -343,13 +361,15 @@ export default async function PlantDetailPage({
                             {log.notes ?? "No notes recorded."}
                           </p>
                         </div>
-                        {log.photo_url && (
-                          <img
-                            src={log.photo_url}
-                            alt={`Care log photo for ${typedPlant.name}`}
-                            className="mt-3 h-56 w-full rounded-2xl object-cover sm:h-80"
-                          />
-                        )}
+                        {log.photo_url ? (
+                          <div className="mt-3 flex max-h-80 w-full items-center justify-center overflow-hidden rounded-2xl bg-black/5">
+                            <img
+                              src={log.photo_url}
+                              alt={`Care log photo for ${typedPlant.name}`}
+                              className="max-h-80 w-auto object-contain"
+                            />
+                          </div>
+                        ) : null}
                       </div>
                     );
                   })}

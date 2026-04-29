@@ -13,6 +13,7 @@ type EditCareLogButtonProps = {
   log: {
     id: number;
     plant_id: number;
+    plant_name: string;
     action_type: string;
     action_date: string;
     notes: string | null;
@@ -66,9 +67,15 @@ export default function EditCareLogButton({
             className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
-            <h3 className="text-xl font-semibold">Edit Care Log</h3>
+            <h2 className="text-xl font-semibold">Edit Care Log</h2>
 
-            <p className="mt-2 ">Update this avocado observation.</p>
+            <p className="mt-2 ">
+              Update{" "}
+              <span style={{ color: "#5e6c20" }} className="font-semibold">
+                {log.plant_name}
+              </span>
+              🥑
+            </p>
 
             <form action={formAction} className="mt-6 space-y-4">
               <input type="hidden" name="log_id" value={log.id} />
