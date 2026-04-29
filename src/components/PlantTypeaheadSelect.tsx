@@ -31,7 +31,6 @@ export default function PlantTypeaheadSelect({
     return plants.filter((p) => p.name.toLowerCase().includes(q));
   }, [plants, query]);
 
-  // 👇 THIS is the important part
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!containerRef.current) return;
