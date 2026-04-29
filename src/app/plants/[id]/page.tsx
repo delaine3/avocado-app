@@ -172,10 +172,17 @@ export default async function PlantDetailPage({
       </div>
       <div className="field-form">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <h1 className="title-sm">
-            <span className="plant-label">Plant Name:</span>
-            <span className="plant-name-value">{typedPlant.name}🌱🥑</span>
-          </h1>
+          <div className="mt-4">
+            <h1 className="title-sm">
+              <span className="plant-label">Plant Name:</span>
+              <span className="plant-name-value">{typedPlant.name}🌱🥑</span>
+            </h1>
+            <PlantTypeaheadSelect
+              plants={plantOptions}
+              currentPlantId={typedPlant.id}
+            />
+          </div>
+
           <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
             <div className="mt-4 rounded-xl border border-stone-300 px-4 py-2 font-medium bg-stone-50">
               <span className="font-bold">Stage: </span>
@@ -195,12 +202,6 @@ export default async function PlantDetailPage({
                 notes: typedPlant.notes,
               }}
             />
-            <div className="mt-4">
-              <PlantTypeaheadSelect
-                plants={plantOptions}
-                currentPlantId={typedPlant.id}
-              />
-            </div>
           </div>
         </div>
 
