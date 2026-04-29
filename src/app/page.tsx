@@ -88,7 +88,6 @@ export default async function HomePage() {
                 className="block"
                 style={{ color: "#ffffff" }}
               >
-                {" "}
                 {plant.recent_photo_url && (
                   <img
                     src={plant.recent_photo_url}
@@ -99,7 +98,7 @@ export default async function HomePage() {
                 <h2 className="text-xl font-semibold">{plant.name}</h2>
                 <p className="mt-2">Stage: {toTitleCase(plant.stage)}</p>
                 <p>
-                  Last cared:{" "}
+                  Last cared:
                   {plant.last_care_date
                     ? new Date(plant.last_care_date).toLocaleDateString()
                     : "No care logs yet"}

@@ -16,6 +16,7 @@ import EditCareLogButton from "@/src/components/EditCareLogButton";
 import EditPlantButton from "@/src/components/EditPlantButton";
 import { toTitleCase } from "../../utilities/format";
 import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
+import CompressedImageInput from "@/src/components/CompressedImageInput";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -204,7 +205,6 @@ export default async function PlantDetailPage({
         </div>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {" "}
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
             <p className="mt-2 ">{typedPlant.started_at ?? "Not set"}</p>
@@ -226,7 +226,6 @@ export default async function PlantDetailPage({
         </section>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {" "}
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Add Care Log</h2>
 
@@ -284,13 +283,7 @@ export default async function PlantDetailPage({
               </div>
               <div className="rounded-2xl">
                 <label className="mb-2 block  font-medium">Photo Journal</label>
-                <input
-                  id="photo"
-                  name="photo"
-                  type="file"
-                  accept="image/*"
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                />
+                <CompressedImageInput id="photo" name="photo" />
               </div>
               <button type="submit" className="submit-button">
                 Save Care Log

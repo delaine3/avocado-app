@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import type { ActionResult } from "../app/actions/plant-actions";
+import CompressedImageInput from "./CompressedImageInput";
 
 type EditCareLogButtonProps = {
   action: (
@@ -70,7 +71,7 @@ export default function EditCareLogButton({
             <h2 className="text-xl font-semibold">Edit Care Log</h2>
 
             <p className="mt-2 ">
-              Update{" "}
+              Update
               <span style={{ color: "#5e6c20" }} className="font-semibold">
                 {log.plant_name}
               </span>
@@ -138,13 +139,7 @@ export default function EditCareLogButton({
               </div>
               <div className="rounded-2xl">
                 <label className="mb-2 block  font-medium">Photo Journal</label>
-                <input
-                  id="photo"
-                  name="photo"
-                  type="file"
-                  accept="image/*"
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                />
+                <CompressedImageInput id="photo" name="photo" />
               </div>
               {log.photo_url && (
                 <img

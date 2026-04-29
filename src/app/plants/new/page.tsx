@@ -42,7 +42,7 @@ export default function NewPlantPage() {
     <main className="min-h-screen bg-stone-50 px-6 py-10  page">
       <Link href="/" className="  underline underline-offset-4">
         ← Back to dashboard
-      </Link>{" "}
+      </Link>
       <div className="page-header">
         <h1 className="title">Add a New Avocado</h1>
         <p className="">
