@@ -52,7 +52,7 @@ export async function GET(req: Request) {
     const daysSinceCare =
       (now.getTime() - lastCareDate.getTime()) / (1000 * 60 * 60 * 24);
 
-    return daysSinceCare >= 3;
+    return daysSinceCare >= 0;
   });
 
   // 4. If nothing needs care
