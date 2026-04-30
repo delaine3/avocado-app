@@ -349,7 +349,6 @@ export default async function PlantDetailPage({
                         </div>
                         <div style={{ color: "#2596be" }}>
                           <p className=" font-medium ">
-                            formatDate(plant.last_care_date)
                             {formatDate(log.action_date)}
                           </p>
                           <p className=" ">
