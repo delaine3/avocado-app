@@ -14,7 +14,7 @@ import { Trash2 } from "lucide-react";
 import ActionFormButton from "@/src/components/ActionFormButton";
 import EditCareLogButton from "@/src/components/EditCareLogButton";
 import EditPlantButton from "@/src/components/EditPlantButton";
-import { toTitleCase } from "../../utilities/format";
+import { formatDate, toTitleCase } from "../../utilities/format";
 import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
 import CompressedImageInput from "@/src/components/CompressedImageInput";
 
@@ -349,7 +349,8 @@ export default async function PlantDetailPage({
                         </div>
                         <div style={{ color: "#2596be" }}>
                           <p className=" font-medium ">
-                            {new Date(log.action_date).toLocaleDateString()}
+                            formatDate(plant.last_care_date)
+                            {formatDate(log.action_date)}
                           </p>
                           <p className=" ">
                             {log.notes ?? "No notes recorded."}

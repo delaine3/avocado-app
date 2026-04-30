@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import ActionFormButton from "../components/ActionFormButton";
 import { deletePlant, updatePlant } from "./actions/plant-actions";
 import EditPlantButton from "../components/EditPlantButton";
-import { toTitleCase } from "./utilities/format";
+import { formatDate, toTitleCase } from "./utilities/format";
 import BulkCareLogForm from "../components/BulkCareLogForm";
 import { createCareLogForAllPlants } from "./actions/plant-actions";
 
@@ -49,19 +49,29 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen p-8 page">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight title">AvoLog</h1>
-            <p className="mt-3 text-lg">
-              Track your avocado squad, water changes, growth, and photos.
-            </p>
-          </div>
-
+        <div className="flex items-start justify-start gap-4 my-4">
           <BulkCareLogForm action={createCareLogForAllPlants} />
 
           <Link href="/plants/new" className="create-button">
             Add Plant
           </Link>
+        </div>
+        <div
+          className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-white/30 shadow-sm"
+          style={{
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            backgroundColor: "rgba(255, 255, 255, 0.65)",
+          }}
+        >
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight title">
+              AvoLog🌱🥑
+            </h1>
+            <p className="mt-3 text-lg">
+              Track your avocado squad, water changes, growth, and photos.
+            </p>
+          </div>
         </div>
 
         {error && (
@@ -81,7 +91,10 @@ export default async function HomePage() {
             <div
               key={plant.id}
               className="rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md"
-              style={{ backgroundColor: "#9d772d" }}
+              style={{
+                background:
+                  "linear-gradient(147deg, #9d772d, #8d6b29, #b19257,#9d772d)",
+              }}
             >
               <Link
                 href={`/plants/${plant.id}`}
@@ -100,7 +113,7 @@ export default async function HomePage() {
                 <p>
                   Last cared:
                   {plant.last_care_date
-                    ? new Date(plant.last_care_date).toLocaleDateString()
+                    ? formatDate(plant.last_care_date)
                     : "No care logs yet"}
                 </p>
                 <p>Location: {plant.location ?? "Not set"}</p>
