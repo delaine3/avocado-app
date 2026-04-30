@@ -93,7 +93,7 @@ export default async function HomePage() {
               className="rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md"
               style={{
                 background:
-                  "linear-gradient(147deg, #9d772d, #8d6b29, #b19257,#9d772d)",
+                  "linear-gradient(147deg, #9d772d, #8d6b29, #a78542,#b19257,#9d772d,#5e471b)",
               }}
             >
               <Link
@@ -111,13 +111,18 @@ export default async function HomePage() {
                 <h2 className="text-xl font-semibold">{plant.name}</h2>
                 <p className="mt-2">Stage: {toTitleCase(plant.stage)}</p>
                 <p>
-                  Last cared:
+                  Last cared:{" "}
                   {plant.last_care_date
                     ? formatDate(plant.last_care_date)
                     : "No care logs yet"}
                 </p>
                 <p>Location: {plant.location ?? "Not set"}</p>
-                <p>Container: {plant.container_type ?? "Not set"}</p>
+                <p>
+                  Container:
+                  {plant.container_type
+                    ? toTitleCase(plant.container_type)
+                    : "Not set"}
+                </p>
                 {plant.notes && <p className="mt-3">{plant.notes}</p>}
               </Link>
 

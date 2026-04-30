@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { notFound } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import type { Plant } from "../../../types/plant";
 import type { CareLog } from "../../../types/care-log";
 import {
@@ -16,67 +14,12 @@ import EditCareLogButton from "@/src/components/EditCareLogButton";
 import EditPlantButton from "@/src/components/EditPlantButton";
 import { formatDate, toTitleCase } from "../../utilities/format";
 import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
-import CompressedImageInput from "@/src/components/CompressedImageInput";
+import CareLogForm from "@/src/components/CareLogForm";
 
 interface PlantDetailPageProps {
   params: Promise<{
     id: string;
   }>;
-}
-
-async function createCareLog(formData: FormData) {
-  "use server";
-
-  const supabase = createSupabaseServerClient();
-
-  const plantId = formData.get("plant_id")?.toString();
-  const actionType = formData.get("action_type")?.toString();
-  const actionDate = formData.get("action_date")?.toString();
-  const notes = formData.get("notes")?.toString().trim() || null;
-  const photo = formData.get("photo") as File | null;
-
-  if (!plantId || !actionType || !actionDate) {
-    throw new Error("Plant ID, action type, and action date are required.");
-  }
-
-  let photoUrl: string | null = null;
-
-  if (photo && photo.size > 0) {
-    const fileExt = photo.name.split(".").pop();
-    const filePath = `${plantId}/${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("care-log-photos")
-      .upload(filePath, photo, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      throw new Error(uploadError.message);
-    }
-
-    const { data } = supabase.storage
-      .from("care-log-photos")
-      .getPublicUrl(filePath);
-
-    photoUrl = data.publicUrl;
-  }
-
-  const { error } = await supabase.from("care_logs").insert({
-    plant_id: Number(plantId),
-    action_type: actionType,
-    action_date: actionDate,
-    notes,
-    photo_url: photoUrl,
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  revalidatePath(`/plants/${plantId}`);
-  redirect(`/plants/${plantId}`);
 }
 
 function getLogTypeMeta(actionType: string) {
@@ -115,7 +58,12 @@ function getLogTypeMeta(actionType: string) {
         className: "bg-[#ece7dc] text-[#5c4a34]",
         icon: "📝",
       };
-
+    case "repotted":
+      return {
+        label: "Repotted",
+        className: "bg-[#e8dcc6] text-[#5c3d1e]",
+        icon: "🪴",
+      };
     default:
       return {
         label: actionType.replaceAll("_", " "),
@@ -208,7 +156,9 @@ export default async function PlantDetailPage({
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
-            <p className="mt-2 ">{typedPlant.started_at ?? "Not set"}</p>
+            <p className="mt-2 ">
+              {formatDate(typedPlant.started_at) ?? "Not set"}
+            </p>
           </div>
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Location</h2>
@@ -216,80 +166,22 @@ export default async function PlantDetailPage({
           </div>
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
-            <p className="mt-2 ">{typedPlant.container_type ?? "Not set"}</p>
+            <p className="mt-2 ">
+              {typedPlant.container_type
+                ? toTitleCase(plant.container_type)
+                : "Not set"}
+            </p>
           </div>
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Created</h2>
-            <p className="mt-2 ">
-              {new Date(typedPlant.created_at).toLocaleDateString()}
-            </p>
+            <p className="mt-2 ">{formatDate(typedPlant.created_at)}</p>
           </div>
         </section>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border p-5">
             <h2 className="text-lg font-semibold">Add Care Log</h2>
-
-            <form action={createCareLog} className="mt-4 space-y-4">
-              <input type="hidden" name="plant_id" value={typedPlant.id} />
-              <div>
-                <label
-                  htmlFor="action_type"
-                  className="mb-2 block  font-medium"
-                >
-                  Log Type
-                </label>
-                <select
-                  id="action_type"
-                  name="action_type"
-                  required
-                  defaultValue="water_change"
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                >
-                  <option value="water_change">Water Change</option>
-                  <option value="root_growth">Root Growth</option>
-                  <option value="leaf_growth">Leaf Growth</option>
-                  <option value="seed_crack">Seed Crack</option>
-                  <option value="general_update">General Update</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="action_date"
-                  className="mb-2 block  font-medium"
-                >
-                  Care Date
-                </label>
-                <input
-                  id="action_date"
-                  name="action_date"
-                  defaultValue={new Date().toISOString().split("T")[0]}
-                  type="date"
-                  required
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="notes" className="mb-2 block  font-medium">
-                  Notes
-                </label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  rows={3}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                  placeholder="Fresh water, roots looked bright white, tiny crack widening."
-                />
-              </div>
-              <div className="rounded-2xl">
-                <label className="mb-2 block  font-medium">Photo Journal</label>
-                <CompressedImageInput id="photo" name="photo" />
-              </div>
-              <button type="submit" className="submit-button">
-                Save Care Log
-              </button>
-            </form>
+            <CareLogForm plantId={typedPlant.id} />
           </div>
           <div className="flex h-[28rem] flex-col rounded-2xl border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
@@ -327,6 +219,8 @@ export default async function PlantDetailPage({
                               log={{
                                 id: log.id,
                                 plant_name: typedPlant.name,
+                                plant_stage: typedPlant.stage,
+                                container_type: typedPlant.container_type,
                                 plant_id: typedPlant.id,
                                 action_type: log.action_type,
                                 action_date: log.action_date,

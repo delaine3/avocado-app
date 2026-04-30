@@ -148,23 +148,29 @@ export default function EditPlantButton({
                   />
                 </div>
               </div>
-
-              <div>
-                <label
-                  htmlFor={`container_type_${plant.id}`}
-                  className="mb-2 block  font-medium"
-                >
-                  Container Type
-                </label>
-                <input
-                  id={`container_type_${plant.id}`}
-                  name="container_type"
-                  type="text"
-                  defaultValue={plant.container_type ?? ""}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
-                  placeholder="glass jar, vase, water glass..."
-                />
-              </div>
+              {plant.stage == "potted" ? (
+                <div>
+                  <label className="mb-2 block font-medium">
+                    New Container Type
+                  </label>
+                  <div className="bg-blue">{plant.container_type}</div>
+                  <select
+                    name="container_type"
+                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    defaultValue={plant.container_type ?? ""}
+                  >
+                    <option value="" disabled>
+                      Select new container
+                    </option>
+                    <option value="water_jar">Water Jar</option>
+                    <option value="small_pot">Small Pot</option>
+                    <option value="medium_pot">Medium Pot</option>
+                    <option value="large_pot">Large Pot</option>
+                  </select>
+                </div>
+              ) : (
+                <></>
+              )}
 
               <div>
                 <label

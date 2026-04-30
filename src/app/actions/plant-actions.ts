@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "../../lib/supabase-server";
-
+import { redirect } from "next/navigation";
 export type ActionResult = {
   ok: boolean;
   message: string;
 };
-
+//delete careLog
 export async function deleteCareLog(
   _prevState: ActionResult | null,
   formData: FormData,
@@ -34,7 +34,7 @@ export async function deleteCareLog(
 
   return { ok: true, message: "Care log deleted." };
 }
-
+//delete a plant
 export async function deletePlant(
   _prevState: ActionResult | null,
   formData: FormData,
@@ -61,7 +61,7 @@ export async function deletePlant(
 
   return { ok: true, message: "Plant deleted." };
 }
-
+//Update a CareLog
 export async function updateCareLog(
   _prevState: ActionResult | null,
   formData: FormData,
@@ -74,6 +74,7 @@ export async function updateCareLog(
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
   const photo = formData.get("photo") as File | null;
+  const containerType = formData.get("container_type")?.toString();
 
   if (!logId || !plantId || !actionType || !actionDate) {
     return { ok: false, message: "Missing required fields." };
@@ -126,11 +127,25 @@ export async function updateCareLog(
   if (error) {
     return { ok: false, message: error.message };
   }
+  if (actionType === "repotted" && containerType) {
+    const { error: plantUpdateError } = await supabase
+      .from("plants")
+      .update({
+        container_type: containerType,
+        stage: "potted",
+      })
+      .eq("id", Number(plantId));
 
+    if (plantUpdateError) {
+      throw new Error(plantUpdateError.message);
+    }
+  }
   revalidatePath(`/plants/${plantId}`);
 
   return { ok: true, message: "Care log updated." };
 }
+
+//Update a plant
 export async function updatePlant(
   _prevState: ActionResult | null,
   formData: FormData,
@@ -142,8 +157,7 @@ export async function updatePlant(
   const startedAt = formData.get("started_at")?.toString() || null;
   const stage = formData.get("stage")?.toString().trim() || null;
   const location = formData.get("location")?.toString().trim() || null;
-  const containerType =
-    formData.get("container_type")?.toString().trim() || null;
+  const containerType = formData.get("container_type")?.toString().trim();
   const notes = formData.get("notes")?.toString().trim() || null;
 
   if (!plantId || !name) {
@@ -171,6 +185,8 @@ export async function updatePlant(
 
   return { ok: true, message: "Plant updated." };
 }
+
+//Create Care Log for all plants
 export async function createCareLogForAllPlants(
   _prevState: ActionResult | null,
   formData: FormData,
@@ -220,4 +236,73 @@ export async function createCareLogForAllPlants(
     ok: true,
     message: `Care log added to ${plants.length} plants.`,
   };
+}
+
+//Create Care Log
+export async function createCareLog(formData: FormData) {
+  "use server";
+
+  const supabase = createSupabaseServerClient();
+
+  const plantId = formData.get("plant_id")?.toString();
+  const actionType = formData.get("action_type")?.toString();
+  const actionDate = formData.get("action_date")?.toString();
+  const notes = formData.get("notes")?.toString().trim() || null;
+  const photo = formData.get("photo") as File | null;
+  const containerType =
+    formData.get("container_type")?.toString().trim() || null;
+  if (!plantId || !actionType || !actionDate) {
+    throw new Error("Plant ID, action type, and action date are required.");
+  }
+
+  let photoUrl: string | null = null;
+
+  if (photo && photo.size > 0) {
+    const fileExt = photo.name.split(".").pop();
+    const filePath = `${plantId}/${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("care-log-photos")
+      .upload(filePath, photo, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data } = supabase.storage
+      .from("care-log-photos")
+      .getPublicUrl(filePath);
+
+    photoUrl = data.publicUrl;
+  }
+
+  const { error } = await supabase.from("care_logs").insert({
+    plant_id: Number(plantId),
+    action_type: actionType,
+    action_date: actionDate,
+    notes,
+    photo_url: photoUrl,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  if (actionType === "repotted" && containerType) {
+    const { error: plantUpdateError } = await supabase
+      .from("plants")
+      .update({
+        container_type: containerType,
+        stage: "potted",
+      })
+      .eq("id", Number(plantId));
+
+    if (plantUpdateError) {
+      throw new Error(plantUpdateError.message);
+    }
+  }
+  revalidatePath(`/plants/${plantId}`);
+  redirect(`/plants/${plantId}`);
 }

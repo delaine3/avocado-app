@@ -65,6 +65,7 @@ export default function BulkCareLogForm({ action }: Props) {
                   <option value="leaf_growth">Leaf Growth</option>
                   <option value="seed_crack">Seed Crack</option>
                   <option value="general_update">General Update</option>
+                  <option value="repotted">Repotted</option>
                 </select>
               </div>
 

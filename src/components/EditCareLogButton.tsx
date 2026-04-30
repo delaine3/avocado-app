@@ -15,8 +15,10 @@ type EditCareLogButtonProps = {
     id: number;
     plant_id: number;
     plant_name: string;
+    plant_stage: string;
     action_type: string;
     action_date: string;
+    container_type: string;
     notes: string | null;
     label?: string | null;
     icon?: boolean | true;
@@ -29,6 +31,7 @@ export default function EditCareLogButton({
   log,
 }: EditCareLogButtonProps) {
   const [open, setOpen] = useState(false);
+  const [selectedActionType, setSelectedActionType] = useState("");
 
   const [state, formAction, pending] = useActionState<
     ActionResult | null,
@@ -92,6 +95,7 @@ export default function EditCareLogButton({
                 <select
                   id={`action_type_${log.id}`}
                   name="action_type"
+                  onChange={(e) => setSelectedActionType(e.target.value)}
                   defaultValue={log.action_type}
                   required
                   className="w-full rounded-xl border px-4 py-3 outline-none"
@@ -101,9 +105,30 @@ export default function EditCareLogButton({
                   <option value="leaf_growth">Leaf Growth</option>
                   <option value="seed_crack">Seed Crack</option>
                   <option value="general_update">General Update</option>
+                  <option value="repotted">Repotted</option>
                 </select>
               </div>
+              {selectedActionType === "repotted" && (
+                <div>
+                  <label className="mb-2 block font-medium">
+                    New Container Type
+                  </label>
 
+                  <select
+                    name="container_type"
+                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select new container
+                    </option>
+                    <option value="water_jar">Water Jar</option>
+                    <option value="small_pot">Small Pot</option>
+                    <option value="medium_pot">Medium Pot</option>
+                    <option value="large_pot">Large Pot</option>
+                  </select>
+                </div>
+              )}
               <div>
                 <label
                   htmlFor={`action_date_${log.id}`}

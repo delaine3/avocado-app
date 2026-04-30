@@ -16,4 +16,5 @@ export interface CareLog {
   notes: string | null;
   created_at: string;
   photo_url: string | null;
+  container_type: string;
 }

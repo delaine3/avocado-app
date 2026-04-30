@@ -12,8 +12,7 @@ async function createPlant(formData: FormData) {
   const started_at = formData.get("started_at")?.toString() || null;
   const stage = formData.get("stage")?.toString().trim();
   const location = formData.get("location")?.toString().trim() || null;
-  const container_type =
-    formData.get("container_type")?.toString().trim() || null;
+  const container_type = formData.get("container_type")?.toString().trim();
   const notes = formData.get("notes")?.toString().trim() || null;
 
   if (!name || !stage) {
