@@ -188,6 +188,13 @@ export async function createCareLogForAllPlants(
   formData: FormData,
 ): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in.");
+  }
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
@@ -213,6 +220,7 @@ export async function createCareLogForAllPlants(
     action_type: actionType,
     action_date: actionDate,
     notes,
+    user_id: user.id,
   }));
 
   const { error } = await supabase.from("care_logs").insert(logsToInsert);
@@ -238,6 +246,13 @@ export async function createCareLog(formData: FormData) {
   "use server";
 
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in.");
+  }
   const plantId = formData.get("plant_id")?.toString();
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
@@ -279,8 +294,8 @@ export async function createCareLog(formData: FormData) {
     action_date: actionDate,
     notes,
     photo_url: photoUrl,
+    user_id: user.id,
   });
-
   if (error) {
     throw new Error(error.message);
   }
