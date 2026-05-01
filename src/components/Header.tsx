@@ -38,14 +38,17 @@ export default function Header() {
   }
 
   return (
-    <header className="w-full px-4 py-3 flex items-center justify-between border-b bg-white/60 backdrop-blur-md">
+    <header
+      className="w-full px-4 py-3 flex items-center justify-between border-b backdrop-blur-md"
+      style={{ background: "#455411" }}
+    >
       <h1 className="font-bold text-lg">🥑 AvoLog</h1>
 
       <div className="flex items-center gap-3">
-        <BulkCareLogForm action={createCareLogForAllPlants} />
-        <Link href="/plants/new">Add Plant</Link>
         {userEmail ? (
           <>
+            <BulkCareLogForm action={createCareLogForAllPlants} />
+            <Link href="/plants/new">Add Plant</Link>
             <span className="text-sm opacity-70">{userEmail}</span>
 
             <button
