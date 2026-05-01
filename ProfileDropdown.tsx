@@ -64,15 +64,16 @@ export default function ProfileDropdown({
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 w-60 rounded bg-white p-2 shadow-xl text-[#4a2c14]">
-          <div className="px-3 py-2 border-b text-sm">
-            <p className="font-semibold">{displayName}</p>
-            <p className="text-xs opacity-60 truncate">{userEmail}</p>
+        <div className="fixed left-4 right-4 top-28 z-[9999] rounded bg-white p-3 text-[#4a2c14] shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-60 sm:p-2">
+          <div className="border-b border-[#4a2c14]/20 px-3 py-2 text-sm">
+            <p className="truncate font-semibold">{displayName}</p>
+            <p className="truncate text-xs opacity-60">{userEmail}</p>
           </div>
 
           <button
+            type="button"
             onClick={onLogout}
-            className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm hover:bg-[#bed582]/40"
+            className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-3 text-sm hover:bg-[#bed582]/40 sm:py-2"
           >
             <LogOut size={16} />
             Logout
