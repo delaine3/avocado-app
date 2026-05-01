@@ -17,8 +17,7 @@ export async function GET(req: Request) {
   if (!process.env.CARE_REMINDER_EMAIL) {
     return new Response("Missing CARE_REMINDER_EMAIL", { status: 500 });
   }
-
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   // 1. Get plants
