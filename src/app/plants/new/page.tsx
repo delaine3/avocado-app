@@ -7,6 +7,13 @@ async function createPlant(formData: FormData) {
   "use server";
 
   const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in.");
+  }
   const name = formData.get("name")?.toString().trim();
   const started_at = formData.get("started_at")?.toString() || null;
   const stage = formData.get("stage")?.toString().trim();
@@ -25,6 +32,7 @@ async function createPlant(formData: FormData) {
     location,
     container_type,
     notes,
+    user_id: user.id,
   });
 
   if (error) {

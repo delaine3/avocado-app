@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
+import { redirect } from "next/navigation";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -19,11 +20,18 @@ export async function GET(req: Request) {
   }
   const supabase = await createSupabaseServerClient();
   const resend = new Resend(process.env.RESEND_API_KEY);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
   // 1. Get plants
   const { data: plants, error: plantsError } = await supabase
     .from("plants")
-    .select("id, name");
+    .select("id, name")
+    .eq("user_id", user.id);
 
   if (plantsError) {
     return new Response(plantsError.message, { status: 500 });

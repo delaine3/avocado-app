@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
 import type { Plant } from "../../../types/plant";
 import type { CareLog } from "../../../types/care-log";
 import {
@@ -15,6 +14,8 @@ import EditPlantButton from "@/src/components/EditPlantButton";
 import { formatDate, toTitleCase } from "../../utilities/format";
 import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
 import CareLogForm from "@/src/components/CareLogForm";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+import { redirect } from "next/navigation";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -76,7 +77,15 @@ export default async function PlantDetailPage({
   params,
 }: PlantDetailPageProps) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
   const [
     { data: plant, error: plantError },
     { data: careLogs, error: careLogsError },
@@ -91,10 +100,11 @@ export default async function PlantDetailPage({
     supabase
       .from("plants")
       .select("id, name")
+      .eq("user_id", user.id)
       .order("name", { ascending: true }),
   ]);
 
-  if (plantError || !plant) {
+  if (plantError || !plant || plant.user_id !== user.id) {
     notFound();
   }
 
@@ -168,7 +178,7 @@ export default async function PlantDetailPage({
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2 ">
               {typedPlant.container_type
-                ? toTitleCase(plant.container_type)
+                ? toTitleCase(typedPlant.container_type)
                 : "Not set"}
             </p>
           </div>
