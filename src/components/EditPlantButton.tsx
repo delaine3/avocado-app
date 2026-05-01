@@ -16,7 +16,7 @@ type EditPlantButtonProps = {
     started_at: string | null;
     stage: string | null;
     location: string | null;
-    container_type: string | null;
+    container_type: string;
     notes: string | null;
     label?: string | null;
     icon?: boolean | false;
