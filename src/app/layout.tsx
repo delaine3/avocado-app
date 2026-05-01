@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
+import Header from "../components/Header";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body
         className={`${nunito.className} min-h-full flex flex-col bg-stone-50 `}
       >
+        <Header />
         {children}
       </body>
     </html>

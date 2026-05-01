@@ -8,10 +8,17 @@ import EditPlantButton from "../components/EditPlantButton";
 import { formatDate, toTitleCase } from "./utilities/format";
 import BulkCareLogForm from "../components/BulkCareLogForm";
 import { createCareLogForAllPlants } from "./actions/plant-actions";
+import { redirect } from "next/navigation";
 
 export default async function HomePage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
   const [{ data: plants, error }, { data: careLogs, error: careLogsError }] =
     await Promise.all([
       supabase.from("plants").select("*"),
@@ -49,13 +56,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen p-8 page">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-start justify-start gap-4 my-4">
-          <BulkCareLogForm action={createCareLogForAllPlants} />
-
-          <Link href="/plants/new" className="create-button">
-            Add Plant
-          </Link>
-        </div>
+        <div className="flex items-start justify-start gap-4 my-4">x</div>
         <div
           className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-white/30 shadow-sm"
           style={{
