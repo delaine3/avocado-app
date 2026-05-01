@@ -75,33 +75,34 @@ export default function Header() {
       className="sticky top-0 z-40 w-full border-b px-4 py-3 backdrop-blur-md"
       style={{ background: "#455411" }}
     >
-      <div className="mx-auto flex  flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 text-white">
           <span className="text-2xl">🥑</span>
           <span className="text-xl font-extrabold">AvoLog</span>
         </Link>
-
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {userEmail ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                <BulkCareLogForm action={createCareLogForAllPlants} />
-                <Link
-                  href="/plants/new"
-                  className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
-                >
-                  <Plus size={16} />
-                  Add Plant
-                </Link>
+                <div className="border-l-2 border-[white]">
+                  <BulkCareLogForm action={createCareLogForAllPlants} />{" "}
+                </div>
+                <div className="border-l-2 border-[white]">
+                  <Link
+                    href="/plants/new"
+                    className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
+                  >
+                    Add Plant
+                  </Link>
+                </div>
+                <ProfileDropdown
+                  displayName={displayName}
+                  userEmail={userEmail}
+                  avatarUrl={profile?.avatar_url ?? null}
+                  initial={initial}
+                  onLogout={handleLogout}
+                />
               </div>
-
-              <ProfileDropdown
-                displayName={displayName}
-                userEmail={userEmail}
-                avatarUrl={profile?.avatar_url ?? null}
-                initial={initial}
-                onLogout={handleLogout}
-              />
             </>
           ) : (
             <div className="flex items-center gap-2">
