@@ -12,8 +12,7 @@ export async function deleteCareLog(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const logId = formData.get("log_id")?.toString();
   const plantId = formData.get("plant_id")?.toString();
 
@@ -39,8 +38,7 @@ export async function deletePlant(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const plantId = formData.get("plant_id")?.toString();
 
   if (!plantId) {
@@ -66,8 +64,7 @@ export async function updateCareLog(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const logId = formData.get("log_id")?.toString();
   const plantId = formData.get("plant_id")?.toString();
   const actionType = formData.get("action_type")?.toString();
@@ -150,8 +147,7 @@ export async function updatePlant(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const plantId = formData.get("plant_id")?.toString();
   const name = formData.get("name")?.toString().trim();
   const startedAt = formData.get("started_at")?.toString() || null;
@@ -191,8 +187,7 @@ export async function createCareLogForAllPlants(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
@@ -242,8 +237,7 @@ export async function createCareLogForAllPlants(
 export async function createCareLog(formData: FormData) {
   "use server";
 
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const plantId = formData.get("plant_id")?.toString();
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
