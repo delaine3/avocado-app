@@ -164,17 +164,17 @@ export default async function PlantDetailPage({
         </div>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border p-5">
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
             <p className="mt-2 ">
               {formatDate(typedPlant.started_at) ?? "Not set"}
             </p>
           </div>
-          <div className="rounded-2xl border p-5">
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Location</h2>
             <p className="mt-2 ">{typedPlant.location ?? "Not set"}</p>
           </div>
-          <div className="rounded-2xl border p-5">
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2 ">
               {typedPlant.container_type
@@ -182,18 +182,18 @@ export default async function PlantDetailPage({
                 : "Not set"}
             </p>
           </div>
-          <div className="rounded-2xl border p-5">
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Created</h2>
             <p className="mt-2 ">{formatDate(typedPlant.created_at)}</p>
           </div>
         </section>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border p-5">
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Add Care Log</h2>
             <CareLogForm plantId={typedPlant.id} />
           </div>
-          <div className="flex h-[28rem] flex-col rounded-2xl border p-4 sm:h-[32rem] sm:p-5">
+          <div className="flex h-[28rem] flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
             {careLogsError && (
               <p className="mt-3  text-red-600">
@@ -260,7 +260,7 @@ export default async function PlantDetailPage({
                           </p>
                         </div>
                         {log.photo_url ? (
-                          <div className="mt-3 flex max-h-80 w-full items-center justify-center overflow-hidden rounded-2xl bg-black/5">
+                          <div className="mt-3 flex max-h-80 w-full items-center justify-center overflow-hidden rounded bg-black/5">
                             <img
                               src={log.photo_url}
                               alt={`Care log photo for ${typedPlant.name}`}
