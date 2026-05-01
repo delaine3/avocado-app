@@ -6,8 +6,7 @@ import Link from "next/link";
 async function createPlant(formData: FormData) {
   "use server";
 
-  const supabase = createSupabaseServerClient();
-
+  const supabase = await createSupabaseServerClient();
   const name = formData.get("name")?.toString().trim();
   const started_at = formData.get("started_at")?.toString() || null;
   const stage = formData.get("stage")?.toString().trim();
