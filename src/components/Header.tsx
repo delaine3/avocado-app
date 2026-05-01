@@ -43,9 +43,7 @@ export default function Header() {
 
       <div className="flex items-center gap-3">
         <BulkCareLogForm action={createCareLogForAllPlants} />
-        <Link href="/plants/new" className="create-button">
-          Add Plant
-        </Link>
+        <Link href="/plants/new">Add Plant</Link>
         {userEmail ? (
           <>
             <span className="text-sm opacity-70">{userEmail}</span>

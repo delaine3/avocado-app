@@ -6,8 +6,6 @@ import ActionFormButton from "../components/ActionFormButton";
 import { deletePlant, updatePlant } from "./actions/plant-actions";
 import EditPlantButton from "../components/EditPlantButton";
 import { formatDate, toTitleCase } from "./utilities/format";
-import BulkCareLogForm from "../components/BulkCareLogForm";
-import { createCareLogForAllPlants } from "./actions/plant-actions";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
@@ -56,7 +54,6 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen p-8 page">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-start justify-start gap-4 my-4">x</div>
         <div
           className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-white/30 shadow-sm"
           style={{
