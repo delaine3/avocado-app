@@ -55,7 +55,7 @@ export default function NewPlantPage() {
           Log a new seedling, rescue case, or future tree in the squad.
         </p>
       </div>
-      <form action={createPlant} className="rounded-2xl field-form">
+      <form action={createPlant} className="rounded field-form">
         <div>
           <label htmlFor="name" className="mb-2 block  font-medium">
             Name

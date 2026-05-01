@@ -61,7 +61,7 @@ export default function PlantTypeaheadSelect({
       />
 
       {open && (
-        <div className="absolute z-10 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border bg-white shadow-md">
+        <div className="absolute z-10 mt-2 max-h-56 w-full overflow-y-auto rounded border bg-white shadow-md">
           {filteredPlants.length === 0 ? (
             <p className="px-4 py-3 text-sm text-stone-500">No plants found.</p>
           ) : (

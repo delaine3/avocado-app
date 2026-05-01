@@ -162,7 +162,7 @@ export default function EditCareLogButton({
                   placeholder="Roots looked brighter, crack widened, stem tilted upward..."
                 />
               </div>
-              <div className="rounded-2xl">
+              <div className="rounded">
                 <label className="mb-2 block  font-medium">Photo Journal</label>
                 <CompressedImageInput id="photo" name="photo" />
               </div>
@@ -170,7 +170,7 @@ export default function EditCareLogButton({
                 <img
                   src={log.photo_url}
                   alt="Current care log photo"
-                  className="mb-3 h-40 w-full rounded-2xl object-cover"
+                  className="mb-3 h-40 w-full rounded object-cover"
                 />
               )}
               <div className="flex justify-end gap-3 pt-2">

@@ -55,7 +55,7 @@ export default async function HomePage() {
     <main className="min-h-screen p-8 page">
       <div className="mx-auto max-w-5xl">
         <div
-          className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-white/30 shadow-sm"
+          className="flex items-start justify-between gap-3 p-4 rounded border border-white/30 shadow-sm"
           style={{
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
@@ -73,13 +73,13 @@ export default async function HomePage() {
         </div>
 
         {error && (
-          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
+          <div className="mt-8 rounded border border-red-200 bg-red-50 p-5 text-red-700">
             Failed to load plants: {error.message}
           </div>
         )}
 
         {careLogsError && (
-          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
+          <div className="mt-8 rounded border border-red-200 bg-red-50 p-5 text-red-700">
             Failed to load care logs: {careLogsError.message}
           </div>
         )}
@@ -88,7 +88,7 @@ export default async function HomePage() {
           {plantsWithCareData.map((plant) => (
             <div
               key={plant.id}
-              className="rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+              className="rounded border bg-white p-5 shadow-sm transition hover:shadow-md"
               style={{
                 background:
                   "linear-gradient(147deg, #9d772d, #8d6b29, #a78542,#b19257,#9d772d,#5e471b)",
@@ -103,7 +103,7 @@ export default async function HomePage() {
                   <img
                     src={plant.recent_photo_url}
                     alt={`Most recent care photo for ${plant.name}`}
-                    className="mb-4 h-100 w-full rounded-2xl object-cover"
+                    className="mb-4 h-100 w-full rounded object-cover"
                   />
                 )}
                 <h2 className="text-xl font-semibold">{plant.name}</h2>
