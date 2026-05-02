@@ -111,7 +111,7 @@ export default async function FeedPage() {
     )
     .eq("is_private", false)
     .eq("plants.is_private", false)
-    .order("action_date", { ascending: false });
+    .order("created_at", { ascending: false });
 
   const typedCareLogs = (careLogs ?? []) as unknown as FeedCareLog[];
 
@@ -120,7 +120,7 @@ export default async function FeedPage() {
       <div className="mx-auto max-w-3xl">
         <div className="page-header">
           <h1 className="title">AvoLog Feed</h1>
-          <p>See public avocado updates from the community.</p>
+          <p>See public plant updates from the community.</p>
         </div>
 
         {error && (

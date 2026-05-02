@@ -66,7 +66,7 @@ export default function EditPlantButton({
             <h3 className="text-lg font-semibold sm:text-xl">Edit Plant</h3>
 
             <p className="mt-2 text-sm sm:text-base">
-              Update your avocado profile.
+              Update your plant profile.
             </p>
 
             <form action={formAction} className="mt-5 space-y-4 sm:mt-6">
@@ -197,8 +197,8 @@ export default function EditPlantButton({
                   />
                 </label>
                 <div className="text-stone-500">
-                  If this box is checked, the plant will not appear in the feed
-                  and nobody will be able to view it but you.
+                  If this box is checked, the care log will not appear in the
+                  feed and nobody will be able to view it but you.
                 </div>
               </div>
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">

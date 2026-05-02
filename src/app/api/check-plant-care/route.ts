@@ -78,10 +78,10 @@ export async function GET(req: Request) {
   const { error } = await resend.emails.send({
     from: "AvoLog <onboarding@resend.dev>",
     to: process.env.CARE_REMINDER_EMAIL!,
-    subject: "Your avocados need attention 🥑",
+    subject: "Your plants need attention 🥑",
     text: `The following plants have not been tended in 3+ days:\n\n${plantListText}`,
     html: `
-      <h2>Your avocados need attention 🥑</h2>
+      <h2>Your plants need attention 🥑</h2>
       <p>The following plants have not been tended in 3+ days:</p>
       <ul>${plantListHtml}</ul>
       <p>Go take care of your squad 🌱</p>

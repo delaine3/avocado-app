@@ -10,7 +10,7 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: "AvoLog",
-  description: "Track your avocado squad.",
+  description: "Track your plant squad.",
 };
 
 export default function RootLayout({

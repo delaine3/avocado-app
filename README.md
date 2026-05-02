@@ -12,7 +12,7 @@ It helps you stay consistent with plant care through logs, photos, and automated
 
 ## Features
 
-- Track multiple avocado plants
+- Track multiple plants
 - Add care logs (water changes, growth updates, notes)
 - Upload photos for visual progress tracking
 - Edit and delete logs and plants

@@ -42,9 +42,7 @@ export default function BulkCareLogForm({ action }: Props) {
       >
         <h1 className="text-xl sm:text-2xl">Add Log To All Plants</h1>
 
-        <p className="mt-2">
-          Apply one care log entry to every avocado in the nursery.
-        </p>
+        <p className="mt-2">Apply one care log entry to every plant.</p>
 
         <form action={formAction} className="mt-6 space-y-4">
           <div>

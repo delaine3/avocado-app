@@ -67,7 +67,7 @@ export default function CareLogForm({ plantId }: { plantId: number }) {
           <input type="checkbox" name="is_private" className="h-8 w-8" />
         </label>
         <div className="text-stone-500 ">
-          If this box is checked, the plant will not appear in the feed and
+          If this box is checked, the care log will not appear in the feed and
           nobody will be able to view it but you.
         </div>
       </div>
