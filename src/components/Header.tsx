@@ -79,9 +79,23 @@ export default function Header() {
           <span className="text-xl font-extrabold">AvoLog</span>
         </Link>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Link className="flex flex-wrap items-center gap-2" href="/feed">
-            Feed
-          </Link>
+          <div className="border-l-2 border-[white]">
+            <Link
+              className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
+              href="/"
+            >
+              Dashboard
+            </Link>
+          </div>
+          <div className="border-l-2 border-[white]">
+            <Link
+              className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
+              href="/feed"
+            >
+              Feed
+            </Link>
+          </div>
+
           {userEmail ? (
             <>
               <div className="flex flex-wrap items-center gap-2">

@@ -47,9 +47,6 @@ async function createPlant(formData: FormData) {
 export default function NewPlantPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-6 py-10  page">
-      <Link href="/" className="  underline underline-offset-4">
-        ← Back to dashboard
-      </Link>
       <div className="page-header">
         <h1 className="title">Add a New Plant</h1>
         <p className="">

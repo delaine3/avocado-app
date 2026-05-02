@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/src/lib/supabase-server";
-import { formatDate } from "../utilities/format";
+import { formatDate, formatDateTime } from "../utilities/format";
 
 type FeedCareLog = {
   id: number;
@@ -165,8 +165,8 @@ export default async function FeedPage() {
                       )}
 
                       <div>
-                        <p className="text-sm font-semibold text-[#586b20]">
-                          @{username}
+                        <p className="text-md text-[#586b20]">
+                          @{username} {formatDateTime(log.created_at)}
                         </p>
 
                         <Link
@@ -177,7 +177,7 @@ export default async function FeedPage() {
                         </Link>
 
                         <p className="mt-1 text-sm text-[#5b4636]">
-                          {formatDate(log.action_date)}
+                          Care Date {formatDate(log.action_date)}
                         </p>
                       </div>
                     </div>

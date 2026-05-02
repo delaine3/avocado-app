@@ -118,9 +118,6 @@ export default async function PlantDetailPage({
   }));
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
-      <Link href="/" className="  underline underline-offset-4">
-        ← Back to dashboard
-      </Link>
       <div className="page-header mb-6"></div>
       <div className="page-header">
         <h1 className="title"> Plant Profile</h1>
