@@ -23,6 +23,7 @@ export default async function HomePage() {
       supabase
         .from("care_logs")
         .select("plant_id, action_date, created_at, photo_url")
+        .eq("user_id", user.id)
         .order("action_date", { ascending: false }),
     ]);
 
@@ -67,7 +68,7 @@ export default async function HomePage() {
               AvoLog🌱🥑
             </h1>
             <p className="mt-3 text-lg">
-              Track your avocado squad, water changes, growth, and photos.
+              Track your plant squad, water changes, growth, and photos.
             </p>
           </div>
         </div>

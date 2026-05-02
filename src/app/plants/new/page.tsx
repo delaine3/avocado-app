@@ -51,7 +51,7 @@ export default function NewPlantPage() {
         ← Back to dashboard
       </Link>
       <div className="page-header">
-        <h1 className="title">Add a New Avocado</h1>
+        <h1 className="title">Add a New Plant</h1>
         <p className="">
           Log a new seedling, rescue case, or future tree in the squad.
         </p>
