@@ -17,4 +17,5 @@ export interface Plant {
   created_at: string;
   updated_at: string;
   label?: string;
+  is_private: boolean;
 }

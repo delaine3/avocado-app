@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { UserCircle, LogOut, Plus } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
@@ -19,7 +18,6 @@ type UserProfile = {
 export default function Header() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
   async function getUserAndProfile() {
@@ -81,11 +79,14 @@ export default function Header() {
           <span className="text-xl font-extrabold">AvoLog</span>
         </Link>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Link className="flex flex-wrap items-center gap-2" href="/feed">
+            Feed
+          </Link>
           {userEmail ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="border-l-2 border-[white]">
-                  <BulkCareLogForm action={createCareLogForAllPlants} />{" "}
+                  <BulkCareLogForm action={createCareLogForAllPlants} />
                 </div>
                 <div className="border-l-2 border-[white]">
                   <Link
@@ -112,7 +113,7 @@ export default function Header() {
 
               <Link
                 href="/signup"
-                className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-[#455411]"
+                className="rounded bg-white px-3 py-2 text-sm font-semibold text-[#455411]"
               >
                 Sign up
               </Link>

@@ -56,11 +56,7 @@ export default function ActionFormButton({
     <>
       <button
         type="button"
-        className={
-          className +
-          " inline-flex items-center gap-2 rounded-xl px-4 py-2 my-2 mx-2  font-medium text-red-700 transition hover:bg-red-50"
-        }
-        style={{ color: "#586b20", backgroundColor: "#a5b760" }}
+        className={"delete-button"}
         aria-label="Delete care log"
         onClick={() => setOpen(true)}
       >
@@ -70,7 +66,7 @@ export default function ActionFormButton({
       {open && (
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-md rounded bg-white p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
             style={{ backgroundColor: "#ffffff88" }}
           >

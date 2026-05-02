@@ -20,7 +20,7 @@ async function createPlant(formData: FormData) {
   const location = formData.get("location")?.toString().trim() || null;
   const container_type = formData.get("container_type")?.toString().trim();
   const notes = formData.get("notes")?.toString().trim() || null;
-
+  const is_private = formData.get("is_private") === "on";
   if (!name || !stage) {
     throw new Error("Name and stage are required.");
   }
@@ -33,6 +33,7 @@ async function createPlant(formData: FormData) {
     container_type,
     notes,
     user_id: user.id,
+    is_private,
   });
 
   if (error) {
@@ -65,7 +66,7 @@ export default function NewPlantPage() {
             name="name"
             type="text"
             required
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
             placeholder="Earth"
           />
         </div>
@@ -78,7 +79,7 @@ export default function NewPlantPage() {
             id="started_at"
             name="started_at"
             type="date"
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
           />
         </div>
 
@@ -90,7 +91,7 @@ export default function NewPlantPage() {
             id="stage"
             name="stage"
             required
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
             defaultValue="dormant"
           >
             <option value="dormant">Dormant</option>
@@ -110,7 +111,7 @@ export default function NewPlantPage() {
             id="location"
             name="location"
             type="text"
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
             placeholder="Sunroom"
           />
         </div>
@@ -123,11 +124,20 @@ export default function NewPlantPage() {
             id="container_type"
             name="container_type"
             type="text"
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
             placeholder="Water jar"
           />
         </div>
-
+        <div>
+          <span>Keep this plant private?</span>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="is_private" className="h-8 w-8" />
+          </label>
+          <div className="text-stone-500">
+            If this box is checked, the plant will not appear in the feed and
+            nobody will be able to view it but you.
+          </div>
+        </div>
         <div>
           <label htmlFor="notes" className="mb-2 block  font-medium">
             Notes
@@ -136,7 +146,7 @@ export default function NewPlantPage() {
             id="notes"
             name="notes"
             rows={4}
-            className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+            className="w-full rounded border px-4 py-3 outline-none ring-0"
             placeholder="Newest seed with intact coat and suspiciously calm energy."
           />
         </div>

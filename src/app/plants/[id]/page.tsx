@@ -142,7 +142,7 @@ export default async function PlantDetailPage({
           </div>
 
           <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
-            <div className="mt-4 rounded-xl border border-stone-300 px-4 py-2 font-medium bg-stone-50">
+            <div className="mt-4 rounded border border-stone-300 px-4 py-2 font-medium bg-stone-50">
               <span className="font-bold">Stage: </span>
               <span className="font-medium">
                 {toTitleCase(typedPlant.stage)}
@@ -211,53 +211,33 @@ export default async function PlantDetailPage({
                     return (
                       <div
                         key={log.id}
-                        className="rounded-xl p-4 space-y-2"
+                        className="rounded p-4 space-y-2"
                         style={{ background: "rgba(37, 149, 190, 0.31)" }}
                       >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <span
-                            className={`inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-1 text-[10px] sm:px-3 sm:text-xs font-semibold uppercase tracking-normal sm:tracking-wide whitespace-nowrap ${logMeta.className}`}
-                          >
-                            <span className=" leading-none">
-                              {logMeta.icon}
-                            </span>
-                            {logMeta.label}
-                          </span>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <EditCareLogButton
-                              action={updateCareLog}
-                              log={{
-                                id: log.id,
-                                plant_name: typedPlant.name,
-                                plant_stage: typedPlant.stage,
-                                container_type: typedPlant.container_type,
-                                plant_id: typedPlant.id,
-                                action_type: log.action_type,
-                                action_date: log.action_date,
-                                notes: log.notes,
-                                icon: true,
-                              }}
-                            />
-                            <ActionFormButton
-                              action={deleteCareLog}
-                              hiddenFields={[
-                                { name: "log_id", value: log.id },
-                                { name: "plant_id", value: typedPlant.id },
-                              ]}
-                              title="Delete this care log?"
-                              description="This action cannot be undone."
+                        <div className="flex items-start font-medium justify-between">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <span
+                              className={`inline-flex max-w-full items-center gap-1 rounded px-2.5 py-1 text-[10px] sm:px-3 sm:text-xs font-semibold uppercase tracking-normal sm:tracking-wide whitespace-nowrap ${logMeta.className}`}
                             >
-                              <Trash2 size={16} />
-                            </ActionFormButton>
+                              <span className=" leading-none">
+                                {logMeta.icon}
+                              </span>
+                              {logMeta.label}
+                            </span>
                           </div>
+                          <div
+                            className={`px-2 py-1 rounded text-xs ${
+                              log.is_private
+                                ? "bg-red-200 text-red-800"
+                                : "bg-green-200 text-green-800"
+                            }`}
+                          >
+                            {log.is_private ? "🔒 Private" : "🌍 Public"}
+                          </div>{" "}
                         </div>
                         <div style={{ color: "#2596be" }}>
-                          <p className=" font-medium ">
-                            {formatDate(log.action_date)}
-                          </p>
-                          <p className=" ">
-                            {log.notes ?? "No notes recorded."}
-                          </p>
+                          <div>{formatDate(log.action_date)} </div>
+                          <p>{log.notes ?? "No notes recorded."}</p>
                         </div>
                         {log.photo_url ? (
                           <div className="mt-3 flex max-h-80 w-full items-center justify-center overflow-hidden rounded bg-black/5">
@@ -268,6 +248,33 @@ export default async function PlantDetailPage({
                             />
                           </div>
                         ) : null}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <EditCareLogButton
+                            action={updateCareLog}
+                            log={{
+                              id: log.id,
+                              plant_name: typedPlant.name,
+                              plant_stage: typedPlant.stage,
+                              container_type: typedPlant.container_type,
+                              plant_id: typedPlant.id,
+                              action_type: log.action_type,
+                              action_date: log.action_date,
+                              notes: log.notes,
+                              icon: true,
+                            }}
+                          />
+                          <ActionFormButton
+                            action={deleteCareLog}
+                            hiddenFields={[
+                              { name: "log_id", value: log.id },
+                              { name: "plant_id", value: typedPlant.id },
+                            ]}
+                            title="Delete this care log?"
+                            description="This action cannot be undone."
+                          >
+                            <Trash2 size={16} />
+                          </ActionFormButton>
+                        </div>
                       </div>
                     );
                   })}

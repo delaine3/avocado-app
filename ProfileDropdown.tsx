@@ -49,7 +49,7 @@ export default function ProfileDropdown({
           <img
             src={avatarUrl}
             alt={displayName ?? "Profile"}
-            className="h-8 w-8 rounded-full object-cover"
+            className="h-8 w-8 rounded object-cover"
           />
         ) : (
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 font-bold text-[#455411]">
@@ -73,7 +73,7 @@ export default function ProfileDropdown({
           <button
             type="button"
             onClick={onLogout}
-            className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-3 text-sm hover:bg-[#bed582]/40 sm:py-2"
+            className="mt-1 flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40 sm:py-2"
           >
             <LogOut size={16} />
             Logout

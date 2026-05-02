@@ -19,7 +19,7 @@ export default function CareLogForm({ plantId }: { plantId: number }) {
           value={selectedActionType}
           onChange={(e) => setSelectedActionType(e.target.value)}
           required
-          className="w-full rounded-xl border px-4 py-3 outline-none"
+          className="w-full rounded border px-4 py-3 outline-none"
         >
           <option value="">Select log type</option>
           <option value="water_change">Water Change</option>
@@ -37,7 +37,7 @@ export default function CareLogForm({ plantId }: { plantId: number }) {
 
           <select
             name="container_type"
-            className="w-full rounded-xl border px-4 py-3 outline-none"
+            className="w-full rounded border px-4 py-3 outline-none"
             defaultValue=""
           >
             <option value="" disabled>
@@ -58,16 +58,25 @@ export default function CareLogForm({ plantId }: { plantId: number }) {
           type="date"
           required
           defaultValue={new Date().toISOString().split("T")[0]}
-          className="w-full rounded-xl border px-4 py-3 outline-none"
+          className="w-full rounded border px-4 py-3 outline-none"
         />
       </div>
-
+      <div>
+        <span>Keep this plant private?</span>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="is_private" className="h-8 w-8" />
+        </label>
+        <div className="text-stone-500 ">
+          If this box is checked, the plant will not appear in the feed and
+          nobody will be able to view it but you.
+        </div>
+      </div>
       <div>
         <label className="mb-2 block font-medium">Notes</label>
         <textarea
           name="notes"
           rows={3}
-          className="w-full rounded-xl border px-4 py-3 outline-none"
+          className="w-full rounded border px-4 py-3 outline-none"
         />
       </div>
 

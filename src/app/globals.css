@@ -31,7 +31,7 @@ body {
 }
 
 .submit-button {
-  border-radius: 0.75rem;
+  border-radius: 0.25rem;
   background: linear-gradient(135deg, #8fab45, #566729);
   border: solid 1px #e7ded8;
   padding: 0.75rem 1.25rem;
@@ -49,7 +49,7 @@ body {
   transform: translateY(1px);
 }
 .delete-button {
-  border-radius: 0.75rem;
+  border-radius: 0.25rem;
   background: linear-gradient(
     135deg,
     #c05252,
@@ -73,7 +73,7 @@ body {
   transform: translateY(1px);
 }
 .cancel-button {
-  border-radius: 0.75rem;
+  border-radius: 0.25rem;
   background: linear-gradient(
     135deg,
     #a8d5e5,
@@ -99,7 +99,7 @@ body {
   transform: translateY(1px);
 }
 .create-button {
-  border-radius: 0.75rem;
+  border-radius: 0.25rem;
   background: linear-gradient(147deg, #4a2c14, #5c412c);
 
   border: solid 1px #4a2c14;
@@ -115,6 +115,25 @@ body {
 }
 
 .create-button:active {
+  transform: translateY(1px);
+}
+
+.edit-button {
+  border-radius: 0.25rem;
+  background: linear-gradient(147deg, #dbd676, #dcd75e, #b0a034, #aa992e);
+  border: solid 1px #ffffff;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.edit-button:active {
   transform: translateY(1px);
 }
 
