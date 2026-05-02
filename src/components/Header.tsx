@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/src/lib/supabase";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
-import ProfileDropdown from "@/ProfileDropdown";
+import ProfileDropdown from "@/src/components/ProfileDropdown";
 
 type UserProfile = {
   id: string;
@@ -78,47 +78,54 @@ export default function Header() {
           <span className="text-2xl">🥑</span>
           <span className="text-xl font-extrabold">AvoLog</span>
         </Link>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="border-l-2 border-[white]">
-            <Link
-              className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
-              href="/"
-            >
-              Dashboard
-            </Link>
-          </div>
-          <div className="border-l-2 border-[white]">
-            <Link
-              className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
-              href="/feed"
-            >
-              Feed
-            </Link>
-          </div>
 
-          {userEmail ? (
-            <>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="border-l-2 border-[white]">
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 sm:flex">
+            <div className="border-l-2 border-white pl-2">
+              <Link
+                className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
+                href="/"
+              >
+                Dashboard
+              </Link>
+            </div>
+
+            <div className="border-l-2 border-white pl-2">
+              <Link
+                className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
+                href="/feed"
+              >
+                Feed
+              </Link>
+            </div>
+
+            {userEmail && (
+              <>
+                <div className="border-l-2 border-white pl-2">
                   <BulkCareLogForm action={createCareLogForAllPlants} />
                 </div>
-                <div className="border-l-2 border-[white]">
+
+                <div className="border-l-2 border-white pl-2">
                   <Link
                     href="/plants/new"
-                    className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20 "
+                    className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
                   >
                     Add Plant
                   </Link>
                 </div>
-                <ProfileDropdown
-                  displayName={displayName}
-                  userEmail={userEmail}
-                  avatarUrl={profile?.avatar_url ?? null}
-                  initial={initial}
-                  onLogout={handleLogout}
-                />
-              </div>
-            </>
+              </>
+            )}
+          </div>
+
+          {userEmail ? (
+            <ProfileDropdown
+              displayName={displayName}
+              userEmail={userEmail}
+              avatarUrl={profile?.avatar_url ?? null}
+              initial={initial}
+              onLogout={handleLogout}
+              showMobileLinks
+            />
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/login" className="text-sm text-white">
