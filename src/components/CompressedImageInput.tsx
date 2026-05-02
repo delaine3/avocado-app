@@ -56,7 +56,7 @@ export default function CompressedImageInput({
         type="file"
         accept="image/*"
         onChange={handleFileChange}
-        className="w-full rounded-xl border px-4 py-3 outline-none"
+        className="w-full rounded border px-4 py-3 outline-none"
       />
 
       {compressedFile && (

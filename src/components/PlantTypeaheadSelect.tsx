@@ -57,7 +57,7 @@ export default function PlantTypeaheadSelect({
         onFocus={() => setOpen(true)}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search avocado..."
-        className="w-full rounded-xl border px-4 py-3 outline-none"
+        className="w-full rounded border px-4 py-3 outline-none"
       />
 
       {open && (

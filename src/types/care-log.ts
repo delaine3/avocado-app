@@ -17,4 +17,5 @@ export interface CareLog {
   created_at: string;
   photo_url: string | null;
   container_type: string;
+  is_private: boolean;
 }

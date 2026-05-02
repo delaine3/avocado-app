@@ -108,6 +108,15 @@ export default async function HomePage() {
                 )}
                 <h2 className="text-xl font-semibold">{plant.name}</h2>
                 <p className="mt-2">Stage: {toTitleCase(plant.stage)}</p>
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    plant.is_private
+                      ? "bg-red-200 text-red-800"
+                      : "bg-green-200 text-green-800"
+                  }`}
+                >
+                  {plant.is_private ? "🔒 Private" : "🌍 Public"}
+                </span>{" "}
                 <p>
                   Last cared:{" "}
                   {plant.last_care_date
@@ -116,52 +125,53 @@ export default async function HomePage() {
                 </p>
                 <p>Location: {plant.location ?? "Not set"}</p>
                 <p>
-                  Container:
+                  Container:{" "}
                   {plant.container_type
                     ? toTitleCase(plant.container_type)
                     : "Not set"}
                 </p>
                 {plant.notes && <p className="mt-3">{plant.notes}</p>}
               </Link>
+              <div className="flex flex-wrap mt-2 items-center gap-4">
+                <ActionFormButton
+                  action={deletePlant}
+                  hiddenFields={[{ name: "plant_id", value: plant.id }]}
+                  title={`Delete ${plant.name}?`}
+                  description={
+                    <>
+                      <span className="block">
+                        This will permanently remove:
+                      </span>
 
-              <ActionFormButton
-                action={deletePlant}
-                hiddenFields={[{ name: "plant_id", value: plant.id }]}
-                title={`Delete ${plant.name}?`}
-                description={
-                  <>
-                    <span className="block">This will permanently remove:</span>
+                      <span
+                        className="mt-2 block text-lg font-semibold"
+                        style={{ color: "#686e29" }}
+                      >
+                        {plant.name}
+                      </span>
 
-                    <span
-                      className="mt-2 block text-lg font-semibold"
-                      style={{ color: "#686e29" }}
-                    >
-                      {plant.name}
-                    </span>
-
-                    <span className="mt-2 block">
-                      Including all care logs and related history.
-                    </span>
-                  </>
-                }
-                redirectTo="/"
-                className="py-2 text-red-700"
-              >
-                <Trash2 size={16} />
-              </ActionFormButton>
-
-              <EditPlantButton
-                action={updatePlant}
-                plant={{
-                  id: plant.id,
-                  name: plant.name,
-                  started_at: plant.started_at,
-                  stage: plant.stage,
-                  location: plant.location,
-                  container_type: plant.container_type,
-                  notes: plant.notes,
-                }}
-              />
+                      <span className="mt-2 block">
+                        Including all care logs and related history.
+                      </span>
+                    </>
+                  }
+                  redirectTo="/"
+                >
+                  <Trash2 size={16} />
+                </ActionFormButton>
+                <EditPlantButton
+                  action={updatePlant}
+                  plant={{
+                    id: plant.id,
+                    name: plant.name,
+                    started_at: plant.started_at,
+                    stage: plant.stage,
+                    location: plant.location,
+                    container_type: plant.container_type,
+                    notes: plant.notes,
+                  }}
+                />{" "}
+              </div>
             </div>
           ))}
         </section>

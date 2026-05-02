@@ -54,8 +54,7 @@ export default function EditCareLogButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 my-2  font-medium"
-        style={{ color: "#586b20", backgroundColor: "#a5b760" }}
+        className="edit-button"
         aria-label="Edit care log"
         title="Edit care log"
       >
@@ -68,7 +67,7 @@ export default function EditCareLogButton({
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-md rounded bg-white p-6 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <h2 className="text-xl font-semibold">Edit Care Log</h2>
@@ -98,7 +97,7 @@ export default function EditCareLogButton({
                   onChange={(e) => setSelectedActionType(e.target.value)}
                   defaultValue={log.action_type}
                   required
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                  className="w-full rounded border px-4 py-3 outline-none"
                 >
                   <option value="water_change">Water Change</option>
                   <option value="root_growth">Root Growth</option>
@@ -116,7 +115,7 @@ export default function EditCareLogButton({
 
                   <select
                     name="container_type"
-                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    className="w-full rounded border px-4 py-3 outline-none"
                     defaultValue=""
                   >
                     <option value="" disabled>
@@ -142,10 +141,23 @@ export default function EditCareLogButton({
                   type="date"
                   defaultValue={log.action_date}
                   required
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                  className="w-full rounded border px-4 py-3 outline-none"
                 />
               </div>
-
+              <div>
+                <span>Keep this plant private?</span>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="is_private"
+                    className="h-8 w-8"
+                  />
+                </label>
+                <div className="text-stone-500 ">
+                  If this box is checked, the plant will not appear in the feed
+                  and nobody will be able to view it but you.
+                </div>
+              </div>
               <div>
                 <label
                   htmlFor={`notes_${log.id}`}
@@ -158,7 +170,7 @@ export default function EditCareLogButton({
                   name="notes"
                   defaultValue={log.notes ?? ""}
                   rows={4}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                  className="w-full rounded border px-4 py-3 outline-none"
                   placeholder="Roots looked brighter, crack widened, stem tilted upward..."
                 />
               </div>

@@ -65,6 +65,7 @@ export async function updateCareLog(
   formData: FormData,
 ): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
+
   const logId = formData.get("log_id")?.toString();
   const plantId = formData.get("plant_id")?.toString();
   const actionType = formData.get("action_type")?.toString();
@@ -72,6 +73,7 @@ export async function updateCareLog(
   const notes = formData.get("notes")?.toString().trim() || null;
   const photo = formData.get("photo") as File | null;
   const containerType = formData.get("container_type")?.toString();
+  const isPrivate = formData.get("is_private") === "on";
 
   if (!logId || !plantId || !actionType || !actionDate) {
     return { ok: false, message: "Missing required fields." };
@@ -105,11 +107,13 @@ export async function updateCareLog(
     action_type: string;
     action_date: string;
     notes: string | null;
+    is_private: boolean;
     photo_url?: string | null;
   } = {
     action_type: actionType,
     action_date: actionDate,
     notes,
+    is_private: isPrivate,
   };
 
   if (photoUrl) {
@@ -124,6 +128,7 @@ export async function updateCareLog(
   if (error) {
     return { ok: false, message: error.message };
   }
+
   if (actionType === "repotted" && containerType) {
     const { error: plantUpdateError } = await supabase
       .from("plants")
@@ -134,9 +139,10 @@ export async function updateCareLog(
       .eq("id", Number(plantId));
 
     if (plantUpdateError) {
-      throw new Error(plantUpdateError.message);
+      return { ok: false, message: plantUpdateError.message };
     }
   }
+
   revalidatePath(`/plants/${plantId}`);
 
   return { ok: true, message: "Care log updated." };
@@ -155,7 +161,7 @@ export async function updatePlant(
   const location = formData.get("location")?.toString().trim() || null;
   const containerType = formData.get("container_type")?.toString().trim();
   const notes = formData.get("notes")?.toString().trim() || null;
-
+  const isPrivate = formData.get("is_private") === "on";
   if (!plantId || !name) {
     return { ok: false, message: "Plant ID and name are required." };
   }
@@ -169,6 +175,7 @@ export async function updatePlant(
       location,
       container_type: containerType,
       notes,
+      isPrivate,
     })
     .eq("id", Number(plantId));
 
@@ -198,7 +205,7 @@ export async function createCareLogForAllPlants(
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
-
+  const isPrivate = formData.get("is_private") === "on";
   if (!actionType || !actionDate) {
     return { ok: false, message: "Log type and date are required." };
   }
@@ -219,6 +226,7 @@ export async function createCareLogForAllPlants(
     plant_id: plant.id,
     action_type: actionType,
     action_date: actionDate,
+    is_private: isPrivate,
     notes,
     user_id: user.id,
   }));
@@ -258,6 +266,7 @@ export async function createCareLog(formData: FormData) {
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
   const photo = formData.get("photo") as File | null;
+  const isPrivate = formData.get("is_private") === "on";
   const containerType =
     formData.get("container_type")?.toString().trim() || null;
   if (!plantId || !actionType || !actionDate) {
@@ -293,6 +302,7 @@ export async function createCareLog(formData: FormData) {
     action_type: actionType,
     action_date: actionDate,
     notes,
+    is_private: isPrivate,
     photo_url: photoUrl,
     user_id: user.id,
   });

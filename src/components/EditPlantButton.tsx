@@ -51,8 +51,7 @@ export default function EditPlantButton({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Edit plant"
-        className="inline-flex items-center gap-2 rounded-xl px-4 py-2 my-2  font-medium text-blue-700 transition hover:bg-blue-50"
-        style={{ color: "#586b20", backgroundColor: "#a5b760" }}
+        className="edit-button"
       >
         <Pencil size={16} />
       </button>
@@ -60,7 +59,7 @@ export default function EditPlantButton({
       {open && (
         <div className="modal-overlay" onClick={() => setOpen(false)}>
           <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-4 shadow-2xl sm:p-6"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded p-4 shadow-2xl sm:p-6"
             style={{ backgroundColor: "#fffaf1" }}
             onClick={(event) => event.stopPropagation()}
           >
@@ -87,7 +86,7 @@ export default function EditPlantButton({
                     type="text"
                     defaultValue={plant.name}
                     required
-                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    className="w-full rounded border px-4 py-3 outline-none"
                   />
                 </div>
 
@@ -103,7 +102,7 @@ export default function EditPlantButton({
                     name="started_at"
                     type="date"
                     defaultValue={plant.started_at ?? ""}
-                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    className="w-full rounded border px-4 py-3 outline-none"
                   />
                 </div>
 
@@ -119,7 +118,7 @@ export default function EditPlantButton({
                     id="stage"
                     name="stage"
                     required
-                    className="w-full rounded-xl border px-4 py-3 outline-none ring-0"
+                    className="w-full rounded border px-4 py-3 outline-none ring-0"
                     defaultValue={plant.stage ?? ""}
                   >
                     <option value="dormant">Dormant</option>
@@ -143,7 +142,7 @@ export default function EditPlantButton({
                     name="location"
                     type="text"
                     defaultValue={plant.location ?? ""}
-                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    className="w-full rounded border px-4 py-3 outline-none"
                     placeholder="kitchen, bedroom, windowsill..."
                   />
                 </div>
@@ -156,7 +155,7 @@ export default function EditPlantButton({
                   <div className="bg-blue">{plant.container_type}</div>
                   <select
                     name="container_type"
-                    className="w-full rounded-xl border px-4 py-3 outline-none"
+                    className="w-full rounded border px-4 py-3 outline-none"
                     defaultValue={plant.container_type ?? ""}
                   >
                     <option value="" disabled>
@@ -184,11 +183,24 @@ export default function EditPlantButton({
                   name="notes"
                   rows={5}
                   defaultValue={plant.notes ?? ""}
-                  className="w-full rounded-xl border px-4 py-3 outline-none"
+                  className="w-full rounded border px-4 py-3 outline-none"
                   placeholder="Earth is recovering, Future Tree is cracking, Flora is thriving..."
                 />
               </div>
-
+              <div>
+                <span>Keep this plant private?</span>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="is_private"
+                    className="h-8 w-8"
+                  />
+                </label>
+                <div className="text-stone-500">
+                  If this box is checked, the plant will not appear in the feed
+                  and nobody will be able to view it but you.
+                </div>
+              </div>
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"

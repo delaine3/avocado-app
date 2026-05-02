@@ -118,6 +118,25 @@ body {
   transform: translateY(1px);
 }
 
+.edit-button {
+  border-radius: 0.75rem;
+  background: linear-gradient(147deg, #dbd676, #dcd75e, #b0a034, #aa992e);
+  border: solid 1px #ffffff;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.edit-button:active {
+  transform: translateY(1px);
+}
+
 .plant-label {
   margin-right: 0.45rem;
   color: #6b5a46;

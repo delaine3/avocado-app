@@ -55,7 +55,7 @@ export default function SignupPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded-xl px-4 py-3"
+          className="w-full border rounded px-4 py-3"
           required
         />
 
@@ -63,7 +63,7 @@ export default function SignupPage() {
           placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full border rounded-xl px-4 py-3"
+          className="w-full border rounded px-4 py-3"
           required
         />
 
@@ -71,7 +71,7 @@ export default function SignupPage() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full border rounded-xl px-4 py-3"
+          className="w-full border rounded px-4 py-3"
           required
         />
 
@@ -80,7 +80,7 @@ export default function SignupPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded-xl px-4 py-3"
+          className="w-full border rounded px-4 py-3"
           required
         />
 

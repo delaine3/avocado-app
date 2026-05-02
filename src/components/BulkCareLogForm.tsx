@@ -36,7 +36,7 @@ export default function BulkCareLogForm({ action }: Props) {
   const modal = (
     <div className="modal-overlay" onClick={() => setOpen(false)}>
       <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-4 shadow-2xl sm:p-6"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded p-4 shadow-2xl sm:p-6"
         onClick={(event) => event.stopPropagation()}
         style={{ backgroundColor: "#fffaf1", color: "#4d370f" }}
       >
