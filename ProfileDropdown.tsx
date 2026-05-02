@@ -52,7 +52,7 @@ export default function ProfileDropdown({
             className="h-8 w-8 rounded object-cover"
           />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-white/90 font-bold text-[#455411]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 font-bold text-[#455411]">
             {initial}
           </div>
         )}

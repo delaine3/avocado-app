@@ -85,7 +85,7 @@ export default function Header() {
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="border-l-2 border-[white]">
-                  <BulkCareLogForm action={createCareLogForAllPlants} />{" "}
+                  <BulkCareLogForm action={createCareLogForAllPlants} />
                 </div>
                 <div className="border-l-2 border-[white]">
                   <Link
