@@ -19,11 +19,10 @@ export default async function HomePage() {
   }
   const [{ data: plants, error }, { data: careLogs, error: careLogsError }] =
     await Promise.all([
-      supabase.from("plants").select("*"),
+      supabase.from("plants").select("*").eq("user_id", user.id),
       supabase
         .from("care_logs")
         .select("plant_id, action_date, created_at, photo_url")
-        .eq("user_id", user.id)
         .order("action_date", { ascending: false }),
     ]);
 
