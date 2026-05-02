@@ -91,7 +91,20 @@ export default async function PlantDetailPage({
     { data: careLogs, error: careLogsError },
     { data: allPlants, error: allPlantsError },
   ] = await Promise.all([
-    supabase.from("plants").select("*").eq("id", id).single(),
+    supabase
+      .from("plants")
+      .select(
+        `
+          *,
+          profiles (
+            username,
+            full_name,
+            avatar_url
+          )
+        `,
+      )
+      .eq("id", id)
+      .single(),
     supabase
       .from("care_logs")
       .select("*")
@@ -118,18 +131,19 @@ export default async function PlantDetailPage({
   }));
 
   const isOwner = typedPlant.user_id == user.id;
-  console.log("user.id", user.id);
-  console.log("typedPlant.id", typedPlant.user_id);
-  console.log("isOwner", isOwner);
+  const owner =
+    plant.profiles?.username ?? plant.profiles?.full_name ?? "Unknown";
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="page-header mb-6"></div>
       <div className="page-header">
         <h1 className="title"> Plant Profile</h1>
-
-        <h1 className="title-sm">{typedPlant.name}</h1>
-        <p className="">{typedPlant.notes ?? "No notes yet."}</p>
+        <h1 className="title-sm">
+          {toTitleCase(owner)}'s plant {typedPlant.name}
+        </h1>
+        <p className="">{typedPlant.notes ?? "No notes yet."}</p>{" "}
+        <p className="">{owner}</p>
       </div>
       <div className="field-form">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">

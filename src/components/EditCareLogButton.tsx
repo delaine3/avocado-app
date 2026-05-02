@@ -145,7 +145,7 @@ export default function EditCareLogButton({
                 />
               </div>
               <div>
-                <span>Keep this plant private?</span>
+                <span>Keep this log private?</span>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
