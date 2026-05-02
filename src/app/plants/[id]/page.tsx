@@ -104,18 +104,24 @@ export default async function PlantDetailPage({
       .order("name", { ascending: true }),
   ]);
 
-  if (plantError || !plant || plant.user_id !== user.id) {
+  if (plantError || !plant) {
     notFound();
   }
-
   const typedPlant = plant as Plant;
   const typedCareLogs = (careLogs ?? []) as CareLog[];
+
   const plantOptions = (
     (allPlants ?? []) as { id: number; name: string }[]
   ).map((plant) => ({
     id: plant.id,
     name: plant.name,
   }));
+
+  const isOwner = typedPlant.user_id == user.id;
+  console.log("user.id", user.id);
+  console.log("typedPlant.id", typedPlant.user_id);
+  console.log("isOwner", isOwner);
+
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="page-header mb-6"></div>
@@ -172,6 +178,11 @@ export default async function PlantDetailPage({
             <p className="mt-2 ">{typedPlant.location ?? "Not set"}</p>
           </div>
           <div className="rounded border p-5">
+            <h2 className="text-lg font-semibold">Visibility</h2>
+
+            <p className="mt-2 "> {plant.is_private ? "Private" : "Public"}</p>
+          </div>
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2 ">
               {typedPlant.container_type
@@ -185,12 +196,16 @@ export default async function PlantDetailPage({
           </div>
         </section>
 
-        <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded border p-5">
-            <h2 className="text-lg font-semibold">Add Care Log</h2>
-            <CareLogForm plantId={typedPlant.id} />
-          </div>
-          <div className="flex h-[28rem] flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
+        <section
+          className={`mt-8 grid grid-cols-1 gap-4 sm:grid-cols-${isOwner == true ? 2 : 1}`}
+        >
+          {isOwner == true && (
+            <div className="rounded border p-5">
+              <h2 className="text-lg font-semibold">Add Care Log</h2>
+              <CareLogForm plantId={typedPlant.id} />
+            </div>
+          )}
+          <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
             {careLogsError && (
               <p className="mt-3  text-red-600">

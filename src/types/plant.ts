@@ -9,6 +9,7 @@ export type PlantStage =
 export interface Plant {
   id: number;
   name: string;
+  user_id: string;
   started_at: string | null;
   stage: PlantStage | string;
   location: string | null;

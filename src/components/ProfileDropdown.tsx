@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LayoutDashboard, LogOut, Newspaper, Plus } from "lucide-react";
+import BulkCareLogForm from "./BulkCareLogForm";
+import { createCareLogForAllPlants } from "../app/actions/plant-actions";
 
 type Props = {
   displayName: string | null;
@@ -9,6 +12,7 @@ type Props = {
   avatarUrl: string | null;
   initial: string;
   onLogout: () => void;
+  showMobileLinks?: boolean;
 };
 
 export default function ProfileDropdown({
@@ -17,6 +21,7 @@ export default function ProfileDropdown({
   avatarUrl,
   initial,
   onLogout,
+  showMobileLinks = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -38,8 +43,7 @@ export default function ProfileDropdown({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
-      {/* Trigger */}
+    <div ref={ref} className="relative z-[9999]">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -57,18 +61,52 @@ export default function ProfileDropdown({
           </div>
         )}
 
-        <div className="hidden sm:block text-left">
+        <div className="hidden text-left sm:block">
           <p className="truncate text-sm font-semibold">{displayName}</p>
         </div>
       </button>
 
-      {/* Dropdown */}
       {open && (
-        <div className="fixed left-4 right-4 top-28 z-[9999] rounded bg-white p-3 text-[#4a2c14] shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-60 sm:p-2">
+        <div className="fixed left-4 right-4 top-20 z-[9999] rounded bg-white p-3 text-[#4a2c14] shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-64 sm:p-2">
           <div className="border-b border-[#4a2c14]/20 px-3 py-2 text-sm">
             <p className="truncate font-semibold">{displayName}</p>
             <p className="truncate text-xs opacity-60">{userEmail}</p>
           </div>
+
+          {showMobileLinks && (
+            <div className="border-b border-[#4a2c14]/20 py-2 sm:hidden">
+              <Link
+                href="/"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
+              >
+                <LayoutDashboard size={16} />
+                Dashboard
+              </Link>
+
+              <Link
+                href="/feed"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
+              >
+                <Newspaper size={16} />
+                Feed
+              </Link>
+
+              <Link
+                href="/plants/new"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
+              >
+                <Plus size={16} />
+                Add Plant
+              </Link>
+
+              <div className="px-3 py-2">
+                <BulkCareLogForm action={createCareLogForAllPlants} />
+              </div>
+            </div>
+          )}
 
           <button
             type="button"

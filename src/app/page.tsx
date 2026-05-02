@@ -116,7 +116,7 @@ export default async function HomePage() {
                   }`}
                 >
                   {plant.is_private ? "🔒 Private" : "🌍 Public"}
-                </span>{" "}
+                </span>
                 <p>
                   Last cared:{" "}
                   {plant.last_care_date

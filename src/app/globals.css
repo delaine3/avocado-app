@@ -50,15 +50,7 @@ body {
 }
 .delete-button {
   border-radius: 0.25rem;
-  background: linear-gradient(
-    135deg,
-    #c05252,
-    #c05d52,
-    #b8483d,
-    #9e2f23,
-    #9e2323,
-    #b02727
-  );
+  background: linear-gradient(135deg, #9e2f23, #9e2323);
   border: solid 1px #e7ded8;
   padding: 0.75rem 1.25rem;
   color: white;
@@ -120,7 +112,7 @@ body {
 
 .edit-button {
   border-radius: 0.25rem;
-  background: linear-gradient(147deg, #dbd676, #dcd75e, #b0a034, #aa992e);
+  background-color: goldenrod;
   border: solid 1px #ffffff;
   padding: 0.75rem 1.25rem;
   color: white;
