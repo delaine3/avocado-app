@@ -5,24 +5,15 @@ import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import type { ActionResult } from "../app/actions/plant-actions";
 import PlantStageTypeahead from "./PlantStageTypeahead";
-import { toTitleCase } from "../app/utilities/format";
+import ContainerTypeahead from "./ContainerTypeahead";
+import { Plant } from "../types/plant";
 
 type EditPlantButtonProps = {
   action: (
     prevState: ActionResult | null,
     formData: FormData,
   ) => Promise<ActionResult>;
-  plant: {
-    id: number;
-    name: string;
-    started_at: string | null;
-    stage: string | null;
-    location: string | null;
-    container_type: string;
-    notes: string | null;
-    label?: string | null;
-    icon?: boolean | false;
-  };
+  plant: Plant;
 };
 
 export default function EditPlantButton({
@@ -78,7 +69,7 @@ export default function EditPlantButton({
                 <div>
                   <label
                     htmlFor={`name_${plant.id}`}
-                    className="mb-2 block  font-medium"
+                    className="mb-2 block font-medium"
                   >
                     Name
                   </label>
@@ -95,7 +86,7 @@ export default function EditPlantButton({
                 <div>
                   <label
                     htmlFor={`started_at_${plant.id}`}
-                    className="mb-2 block  font-medium"
+                    className="mb-2 block font-medium"
                   >
                     Started Date
                   </label>
@@ -107,12 +98,13 @@ export default function EditPlantButton({
                     className="w-full rounded border px-4 py-3 outline-none"
                   />
                 </div>
+
                 <PlantStageTypeahead defaultValue={plant.stage} />
 
                 <div>
                   <label
                     htmlFor={`location_${plant.id}`}
-                    className="mb-2 block  font-medium"
+                    className="mb-2 block font-medium"
                   >
                     Location
                   </label>
@@ -122,40 +114,17 @@ export default function EditPlantButton({
                     type="text"
                     defaultValue={plant.location ?? ""}
                     className="w-full rounded border px-4 py-3 outline-none"
-                    placeholder="kitchen, bedroom, windowsill..."
+                    placeholder="Kitchen, bedroom, windowsill..."
                   />
                 </div>
               </div>
-              {plant.stage == "potted" ? (
-                <div>
-                  <label className="mb-2 block font-medium">
-                    New Container Type
-                  </label>
-                  <div className="bg-blue">
-                    {toTitleCase(plant.container_type)}
-                  </div>
-                  <select
-                    name="container_type"
-                    className="w-full rounded border px-4 py-3 outline-none"
-                    defaultValue={plant.container_type ?? ""}
-                  >
-                    <option value="" disabled>
-                      Select new container
-                    </option>
-                    <option value="water_jar">Water Jar</option>
-                    <option value="small_pot">Small Pot</option>
-                    <option value="medium_pot">Medium Pot</option>
-                    <option value="large_pot">Large Pot</option>
-                  </select>
-                </div>
-              ) : (
-                <></>
-              )}
+
+              <ContainerTypeahead defaultValue={plant.container_type} />
 
               <div>
                 <label
                   htmlFor={`notes_${plant.id}`}
-                  className="mb-2 block  font-medium"
+                  className="mb-2 block font-medium"
                 >
                   Notes
                 </label>
@@ -168,20 +137,24 @@ export default function EditPlantButton({
                   placeholder="Earth is recovering, Future Tree is cracking, Flora is thriving..."
                 />
               </div>
+
               <div>
-                <span>Keep this plant private?</span>
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     name="is_private"
-                    className="h-8 w-8"
+                    defaultChecked={plant.is_private}
+                    className="h-6 w-6"
                   />
+                  <span className="font-medium">Keep this plant private?</span>
                 </label>
-                <div className="text-stone-500">
-                  If this box is checked, the care log will not appear in the
-                  feed and nobody will be able to view it but you.
-                </div>
+
+                <p className="mt-2 text-sm text-stone-500">
+                  If this box is checked, this plant and its care logs will not
+                  appear in the feed.
+                </p>
               </div>
+
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"

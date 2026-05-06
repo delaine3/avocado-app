@@ -154,14 +154,17 @@ export async function updatePlant(
   formData: FormData,
 ): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
+
   const plantId = formData.get("plant_id")?.toString();
   const name = formData.get("name")?.toString().trim();
   const startedAt = formData.get("started_at")?.toString() || null;
   const stage = formData.get("stage")?.toString().trim() || null;
   const location = formData.get("location")?.toString().trim() || null;
-  const containerType = formData.get("container_type")?.toString().trim();
+  const containerType =
+    formData.get("container_type")?.toString().trim() || null;
   const notes = formData.get("notes")?.toString().trim() || null;
   const isPrivate = formData.get("is_private") === "on";
+
   if (!plantId || !name) {
     return { ok: false, message: "Plant ID and name are required." };
   }
@@ -175,7 +178,7 @@ export async function updatePlant(
       location,
       container_type: containerType,
       notes,
-      isPrivate,
+      is_private: isPrivate,
     })
     .eq("id", Number(plantId));
 
@@ -185,6 +188,7 @@ export async function updatePlant(
 
   revalidatePath("/");
   revalidatePath(`/plants/${plantId}`);
+  revalidatePath("/feed");
 
   return { ok: true, message: "Plant updated." };
 }
