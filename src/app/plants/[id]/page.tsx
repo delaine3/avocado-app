@@ -45,54 +45,60 @@ export default async function PlantDetailPage({
     redirect("/login");
   }
 
-  const [
-    { data: plant, error: plantError },
-    { data: careLogs, error: careLogsError },
-    { data: allPlants },
-  ] = await Promise.all([
-    supabase
-      .from("plants")
-      .select(
-        `
-          *,
-          profiles (
-            username,
-            full_name,
-            avatar_url
-          )
-        `,
+  const { data: plant, error: plantError } = await supabase
+    .from("plants")
+    .select(
+      `
+      *,
+      profiles (
+        username,
+        full_name,
+        avatar_url
       )
-      .eq("id", id)
-      .single(),
-
-    supabase
-      .from("care_logs")
-      .select(
-        `
-          *,
-          care_log_photos (
-            id,
-            photo_url,
-            storage_path,
-            created_at
-          )
-        `,
-      )
-      .eq("plant_id", id)
-      .order("action_date", { ascending: false }),
-
-    supabase
-      .from("plants")
-      .select("id, name")
-      .eq("user_id", user.id)
-      .order("name", { ascending: true }),
-  ]);
+    `,
+    )
+    .eq("id", id)
+    .single();
 
   if (plantError || !plant) {
     notFound();
   }
 
   const typedPlant = plant as PlantWithProfile;
+  const isOwner = typedPlant.user_id === user.id;
+
+  if (!isOwner && typedPlant.is_private) {
+    notFound();
+  }
+
+  let careLogsQuery = supabase
+    .from("care_logs")
+    .select(
+      `
+      *,
+      care_log_photos (
+        id,
+        photo_url,
+        storage_path,
+        created_at
+      )
+    `,
+    )
+    .eq("plant_id", id)
+    .order("action_date", { ascending: false });
+
+  if (!isOwner) {
+    careLogsQuery = careLogsQuery.eq("is_private", false);
+  }
+
+  const { data: careLogs, error: careLogsError } = await careLogsQuery;
+
+  const { data: allPlants } = await supabase
+    .from("plants")
+    .select("id, name")
+    .eq("user_id", user.id)
+    .order("name", { ascending: true });
+
   const typedCareLogs = (careLogs ?? []) as CareLog[];
 
   const plantOptions = (
@@ -101,8 +107,6 @@ export default async function PlantDetailPage({
     id: plant.id,
     name: plant.name,
   }));
-
-  const isOwner = typedPlant.user_id === user.id;
 
   const owner =
     typedPlant.profiles?.username ??
@@ -265,13 +269,12 @@ export default async function PlantDetailPage({
                           <p>{log.notes ?? "No notes recorded."}</p>
                         </div>
 
-                        {log.care_log_photos &&
-                          log.care_log_photos.length > 0 && (
-                            <PhotoCarousel
-                              photos={log.care_log_photos}
-                              altBase={`Care log photo for ${typedPlant.name}`}
-                            />
-                          )}
+                        {log.care_log_photos && (
+                          <PhotoCarousel
+                            photos={log.care_log_photos}
+                            altBase={`Care log photo for ${typedPlant.name}`}
+                          />
+                        )}
 
                         {isOwner && (
                           <div className="flex flex-wrap items-center gap-2">
