@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import Link from "next/link";
+import PlantStageTypeahead from "@/src/components/PlantStageTypeahead";
 
 async function createPlant(formData: FormData) {
   "use server";
@@ -79,26 +80,7 @@ export default function NewPlantPage() {
             className="w-full rounded border px-4 py-3 outline-none ring-0"
           />
         </div>
-
-        <div>
-          <label htmlFor="stage" className="mb-2 block  font-medium">
-            Stage
-          </label>
-          <select
-            id="stage"
-            name="stage"
-            required
-            className="w-full rounded border px-4 py-3 outline-none ring-0"
-            defaultValue="dormant"
-          >
-            <option value="dormant">Dormant</option>
-            <option value="cracked">Cracked</option>
-            <option value="rooting">Rooting</option>
-            <option value="stem_emerging">Stem Emerging</option>
-            <option value="leafing">Leafing</option>
-            <option value="potted">Potted</option>
-          </select>
-        </div>
+        <PlantStageTypeahead defaultValue={""} />
 
         <div>
           <label htmlFor="location" className="mb-2 block  font-medium">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/src/lib/supabase-server";
 import { formatDate, formatDateTime } from "../utilities/format";
+import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
 
 type FeedCareLog = {
   id: number;
@@ -25,59 +26,6 @@ type FeedCareLog = {
     avatar_url: string | null;
   } | null;
 };
-
-function getLogTypeMeta(actionType: string) {
-  switch (actionType) {
-    case "water_change":
-      return {
-        label: "Water Change",
-        className: "bg-[#d9ecff] text-[#1f5f99]",
-        icon: "💧",
-      };
-
-    case "root_growth":
-      return {
-        label: "Root Growth",
-        className: "bg-[#e7d4bf] text-[#6b4226]",
-        icon: "🤎",
-      };
-
-    case "leaf_growth":
-      return {
-        label: "Leaf Growth",
-        className: "bg-[#dff2c2] text-[#3d6b1f]",
-        icon: "🍃",
-      };
-
-    case "seed_crack":
-      return {
-        label: "Seed Crack",
-        className: "bg-[#f3e2b8] text-[#8a5a13]",
-        icon: "🥑",
-      };
-
-    case "general_update":
-      return {
-        label: "General Update",
-        className: "bg-[#ece7dc] text-[#5c4a34]",
-        icon: "📝",
-      };
-
-    case "repotted":
-      return {
-        label: "Repotted",
-        className: "bg-[#e8dcc6] text-[#5c3d1e]",
-        icon: "🪴",
-      };
-
-    default:
-      return {
-        label: actionType.replaceAll("_", " "),
-        className: "bg-[#f3efe6] text-[#5f5648]",
-        icon: "📘",
-      };
-  }
-}
 
 export default async function FeedPage() {
   const supabase = await createSupabaseServerClient();
@@ -209,9 +157,9 @@ export default async function FeedPage() {
                   <div className="mt-4 flex items-center gap-3 border-t border-[#4a2c14]/10 pt-3 text-sm text-[#5b4636]">
                     <button
                       type="button"
-                      className="rounded-full bg-white/70 px-3 py-1 font-semibold hover:bg-white"
+                      className="rounded-full bg-white/70 px-3 py-1 text-lg font-semibold hover:bg-white"
                     >
-                      ♡ Like
+                      ♡
                     </button>
 
                     <button

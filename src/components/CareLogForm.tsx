@@ -3,52 +3,33 @@
 import { useState } from "react";
 import CompressedImageInput from "./CompressedImageInput";
 import { createCareLog } from "../app/actions/plant-actions";
+import ContainerTypeahead from "./ContainerTypeahead";
+import ActionTypeahead from "./ActionTypeahead";
 
-export default function CareLogForm({ plantId }: { plantId: number }) {
+type CareLogFormProps = {
+  plantId: number;
+  plantStage: string | null;
+};
+
+export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
   const [selectedActionType, setSelectedActionType] = useState("");
 
   return (
     <form action={createCareLog} className="mt-4 space-y-4">
       <input type="hidden" name="plant_id" value={plantId} />
 
-      <div>
-        <label className="mb-2 block font-medium">Log Type</label>
-
-        <select
-          name="action_type"
-          value={selectedActionType}
-          onChange={(e) => setSelectedActionType(e.target.value)}
-          required
-          className="w-full rounded border px-4 py-3 outline-none"
-        >
-          <option value="">Select log type</option>
-          <option value="water_change">Water Change</option>
-          <option value="root_growth">Root Growth</option>
-          <option value="leaf_growth">Leaf Growth</option>
-          <option value="seed_crack">Seed Crack</option>
-          <option value="general_update">General Update</option>
-          <option value="repotted">Repotted</option>
-        </select>
-      </div>
+      <ActionTypeahead
+        plantStage={plantStage}
+        defaultValue={selectedActionType}
+        onChange={setSelectedActionType}
+      />
 
       {selectedActionType === "repotted" && (
-        <div>
-          <label className="mb-2 block font-medium">New Container Type</label>
-
-          <select
-            name="container_type"
-            className="w-full rounded border px-4 py-3 outline-none"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select new container
-            </option>
-            <option value="water_jar">Water Jar</option>
-            <option value="small_pot">Small Pot</option>
-            <option value="medium_pot">Medium Pot</option>
-            <option value="large_pot">Large Pot</option>
-          </select>
-        </div>
+        <ContainerTypeahead
+          name="container_type"
+          label="New Container Type"
+          required
+        />
       )}
 
       <div>
@@ -61,16 +42,19 @@ export default function CareLogForm({ plantId }: { plantId: number }) {
           className="w-full rounded border px-4 py-3 outline-none"
         />
       </div>
+
       <div>
-        <span>Keep this log private?</span>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" name="is_private" className="h-8 w-8" />
+        <label className="flex items-center gap-3">
+          <input type="checkbox" name="is_private" className="h-6 w-6" />
+          <span className="font-medium">Keep this log private?</span>
         </label>
-        <div className="text-stone-500 ">
+
+        <p className="mt-2 text-sm text-stone-500">
           If this box is checked, the care log will not appear in the feed and
           nobody will be able to view it but you.
-        </div>
+        </p>
       </div>
+
       <div>
         <label className="mb-2 block font-medium">Notes</label>
         <textarea

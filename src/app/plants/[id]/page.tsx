@@ -16,6 +16,7 @@ import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
 import CareLogForm from "@/src/components/CareLogForm";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import { redirect } from "next/navigation";
+import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -23,56 +24,6 @@ interface PlantDetailPageProps {
   }>;
 }
 
-function getLogTypeMeta(actionType: string) {
-  switch (actionType) {
-    case "water_change":
-      return {
-        label: "Water Change",
-        className: "bg-[#d9ecff] text-[#1f5f99]",
-        icon: "💧",
-      };
-
-    case "root_growth":
-      return {
-        label: "Root Growth",
-        className: "bg-[#e7d4bf] text-[#6b4226]",
-        icon: "🤎",
-      };
-
-    case "leaf_growth":
-      return {
-        label: "Leaf Growth",
-        className: "bg-[#dff2c2] text-[#3d6b1f]",
-        icon: "🍃",
-      };
-
-    case "seed_crack":
-      return {
-        label: "Seed Crack",
-        className: "bg-[#f3e2b8] text-[#8a5a13]",
-        icon: "🥑",
-      };
-
-    case "general_update":
-      return {
-        label: "General Update",
-        className: "bg-[#ece7dc] text-[#5c4a34]",
-        icon: "📝",
-      };
-    case "repotted":
-      return {
-        label: "Repotted",
-        className: "bg-[#e8dcc6] text-[#5c3d1e]",
-        icon: "🪴",
-      };
-    default:
-      return {
-        label: actionType.replaceAll("_", " "),
-        className: "bg-[#f3efe6] text-[#5f5648]",
-        icon: "📘",
-      };
-  }
-}
 export default async function PlantDetailPage({
   params,
 }: PlantDetailPageProps) {
@@ -142,63 +93,64 @@ export default async function PlantDetailPage({
         <h1 className="title-sm">
           {toTitleCase(owner)}'s plant {typedPlant.name}
         </h1>
-        <p className="">{typedPlant.notes ?? "No notes yet."}</p>{" "}
-        <p className="">{owner}</p>
+        <p className="">{typedPlant.notes ?? "No notes yet."}</p>
       </div>
       <div className="field-form">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="mt-4">
-            <h1 className="title-sm">
+            <h1 className="title-sm mb-2">
               <span className="plant-label">Plant Name:</span>
               <span className="plant-name-value">{typedPlant.name}🌱🥑</span>
             </h1>
-            <PlantTypeaheadSelect
-              plants={plantOptions}
-              currentPlantId={typedPlant.id}
-            />
+            {isOwner == true && (
+              <EditPlantButton
+                action={updatePlant}
+                plant={{
+                  id: typedPlant.id,
+                  name: typedPlant.name,
+                  started_at: typedPlant.started_at,
+                  stage: typedPlant.stage,
+                  location: typedPlant.location,
+                  container_type: typedPlant.container_type,
+                  notes: typedPlant.notes,
+                }}
+              />
+            )}
           </div>
 
-          <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
-            <div className="mt-4 rounded border border-stone-300 px-4 py-2 font-medium bg-stone-50">
-              <span className="font-bold">Stage: </span>
-              <span className="font-medium">
-                {toTitleCase(typedPlant.stage)}
-              </span>
-            </div>
-            <EditPlantButton
-              action={updatePlant}
-              plant={{
-                id: typedPlant.id,
-                name: typedPlant.name,
-                started_at: typedPlant.started_at,
-                stage: typedPlant.stage,
-                location: typedPlant.location,
-                container_type: typedPlant.container_type,
-                notes: typedPlant.notes,
-              }}
-            />
+          <div className="flex w-full flex-col mt-4 items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
+            {isOwner == true && (
+              <PlantTypeaheadSelect
+                plants={plantOptions}
+                currentPlantId={typedPlant.id}
+              />
+            )}
           </div>
         </div>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded border p-5">
+            <h2 className="text-lg font-semibold">Stage: </h2>
+            <p className="mt-2">{toTitleCase(typedPlant.stage)}</p>
+          </div>
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
-            <p className="mt-2 ">
+            <p className="mt-2">
               {formatDate(typedPlant.started_at) ?? "Not set"}
             </p>
           </div>
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Location</h2>
-            <p className="mt-2 ">{typedPlant.location ?? "Not set"}</p>
+            <p className="mt-2">{typedPlant.location ?? "Not set"}</p>
           </div>
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Visibility</h2>
 
-            <p className="mt-2 "> {plant.is_private ? "Private" : "Public"}</p>
+            <p className="mt-2"> {plant.is_private ? "Private" : "Public"}</p>
           </div>
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
-            <p className="mt-2 ">
+            <p className="mt-2">
               {typedPlant.container_type
                 ? toTitleCase(typedPlant.container_type)
                 : "Not set"}
@@ -206,7 +158,7 @@ export default async function PlantDetailPage({
           </div>
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Created</h2>
-            <p className="mt-2 ">{formatDate(typedPlant.created_at)}</p>
+            <p className="mt-2">{formatDate(typedPlant.created_at)}</p>
           </div>
         </section>
 
@@ -216,7 +168,10 @@ export default async function PlantDetailPage({
           {isOwner == true && (
             <div className="rounded border p-5">
               <h2 className="text-lg font-semibold">Add Care Log</h2>
-              <CareLogForm plantId={typedPlant.id} />
+              <CareLogForm
+                plantId={typedPlant.id}
+                plantStage={typedPlant.stage}
+              />
             </div>
           )}
           <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
@@ -274,33 +229,35 @@ export default async function PlantDetailPage({
                             />
                           </div>
                         ) : null}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <EditCareLogButton
-                            action={updateCareLog}
-                            log={{
-                              id: log.id,
-                              plant_name: typedPlant.name,
-                              plant_stage: typedPlant.stage,
-                              container_type: typedPlant.container_type,
-                              plant_id: typedPlant.id,
-                              action_type: log.action_type,
-                              action_date: log.action_date,
-                              notes: log.notes,
-                              icon: true,
-                            }}
-                          />
-                          <ActionFormButton
-                            action={deleteCareLog}
-                            hiddenFields={[
-                              { name: "log_id", value: log.id },
-                              { name: "plant_id", value: typedPlant.id },
-                            ]}
-                            title="Delete this care log?"
-                            description="This action cannot be undone."
-                          >
-                            <Trash2 size={16} />
-                          </ActionFormButton>
-                        </div>
+                        {isOwner == true && (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <EditCareLogButton
+                              action={updateCareLog}
+                              log={{
+                                id: log.id,
+                                plant_name: typedPlant.name,
+                                plant_stage: typedPlant.stage,
+                                container_type: typedPlant.container_type,
+                                plant_id: typedPlant.id,
+                                action_type: log.action_type,
+                                action_date: log.action_date,
+                                notes: log.notes,
+                                icon: true,
+                              }}
+                            />
+                            <ActionFormButton
+                              action={deleteCareLog}
+                              hiddenFields={[
+                                { name: "log_id", value: log.id },
+                                { name: "plant_id", value: typedPlant.id },
+                              ]}
+                              title="Delete this care log?"
+                              description="This action cannot be undone."
+                            >
+                              <Trash2 size={16} />
+                            </ActionFormButton>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
