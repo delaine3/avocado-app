@@ -2,30 +2,12 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/src/lib/supabase-server";
 import { formatDate, formatDateTime } from "../utilities/format";
 import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
-
-type FeedCareLog = {
-  id: number;
-  plant_id: number;
-  user_id: string;
-  action_type: string;
-  action_date: string;
-  notes: string | null;
-  photo_url: string | null;
-  is_private: boolean;
-  created_at: string;
-  plants: {
-    id: number;
-    name: string;
-    user_id: string;
-    is_private: boolean;
-  };
-  profiles: {
-    id: string;
-    username: string | null;
-    full_name: string | null;
-    avatar_url: string | null;
-  } | null;
-};
+import CareLogComments from "@/src/components/CareLogComments";
+import {
+  createCareLogComment,
+  toggleCareLogLike,
+} from "../actions/plant-actions";
+import CareLogLikeButton from "@/src/components/CareLogLikeButton";
 
 export default async function FeedPage() {
   const supabase = await createSupabaseServerClient();
@@ -54,7 +36,21 @@ export default async function FeedPage() {
           username,
           full_name,
           avatar_url
+        ),
+      care_log_likes (
+        id,
+        user_id
+      ),
+      care_log_comments (
+        id,
+        body,
+        created_at,
+        profiles (
+          username,
+          full_name,
+          avatar_url
         )
+      )
       `,
     )
     .eq("is_private", false)
@@ -62,7 +58,9 @@ export default async function FeedPage() {
     .order("created_at", { ascending: false });
 
   const typedCareLogs = (careLogs ?? []) as unknown as FeedCareLog[];
-
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="mx-auto max-w-3xl">
@@ -72,13 +70,13 @@ export default async function FeedPage() {
         </div>
 
         {error && (
-          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
+          <div className="mt-8 rounded border border-red-200 bg-red-50 p-5 text-red-700">
             Failed to load feed: {error.message}
           </div>
         )}
 
         {typedCareLogs.length === 0 ? (
-          <div className="mt-8 rounded-2xl border bg-white/50 p-6 text-center">
+          <div className="mt-8 rounded border bg-white/50 p-6 text-center">
             <p className="font-semibold">No public updates yet.</p>
             <p className="mt-2 text-sm">
               Public care logs from public plants will appear here.
@@ -87,6 +85,11 @@ export default async function FeedPage() {
         ) : (
           <section className="mt-8 space-y-5">
             {typedCareLogs.map((log) => {
+              const likeCount = log.care_log_likes?.length ?? 0;
+              const likedByCurrentUser = Boolean(
+                user &&
+                log.care_log_likes?.some((like) => like.user_id === user.id),
+              );
               const logMeta = getLogTypeMeta(log.action_type);
               const username =
                 log.profiles?.username ??
@@ -145,7 +148,7 @@ export default async function FeedPage() {
                   )}
 
                   {log.photo_url && (
-                    <div className="mt-4 flex max-h-[28rem] w-full items-center justify-center overflow-hidden rounded-2xl bg-black/5">
+                    <div className="mt-4 flex max-h-[28rem] w-full items-center justify-center overflow-hidden rounded bg-black/5">
                       <img
                         src={log.photo_url}
                         alt={`Care log photo for ${log.plants.name}`}
@@ -153,22 +156,24 @@ export default async function FeedPage() {
                       />
                     </div>
                   )}
-
                   <div className="mt-4 flex items-center gap-3 border-t border-[#4a2c14]/10 pt-3 text-sm text-[#5b4636]">
-                    <button
-                      type="button"
-                      className="rounded-full bg-white/70 px-3 py-1 text-lg font-semibold hover:bg-white"
-                    >
-                      ♡
-                    </button>
+                    <CareLogLikeButton
+                      careLogId={log.id}
+                      likeCount={likeCount}
+                      likedByCurrentUser={likedByCurrentUser}
+                      action={toggleCareLogLike}
+                    />
 
-                    <button
-                      type="button"
-                      className="rounded-full bg-white/70 px-3 py-1 font-semibold hover:bg-white"
-                    >
-                      Comment
-                    </button>
+                    <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                      {log.care_log_comments?.length ?? 0} comments
+                    </span>
                   </div>
+
+                  <CareLogComments
+                    careLogId={log.id}
+                    comments={log.care_log_comments ?? []}
+                    action={createCareLogComment}
+                  />
                 </article>
               );
             })}

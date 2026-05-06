@@ -325,3 +325,98 @@ export async function createCareLog(formData: FormData) {
   revalidatePath(`/plants/${plantId}`);
   redirect(`/plants/${plantId}`);
 }
+
+//likes
+export async function toggleCareLogLike(
+  _prevState: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const supabase = await createSupabaseServerClient();
+
+  const careLogId = formData.get("care_log_id")?.toString();
+
+  if (!careLogId) {
+    return { ok: false, message: "Missing care log ID." };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, message: "You must be logged in." };
+  }
+
+  const { data: existingLike, error: existingLikeError } = await supabase
+    .from("care_log_likes")
+    .select("id")
+    .eq("care_log_id", Number(careLogId))
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingLikeError) {
+    return { ok: false, message: existingLikeError.message };
+  }
+
+  if (existingLike) {
+    const { error } = await supabase
+      .from("care_log_likes")
+      .delete()
+      .eq("id", existingLike.id);
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    revalidatePath("/feed");
+    return { ok: true, message: "Like removed." };
+  }
+
+  const { error } = await supabase.from("care_log_likes").insert({
+    care_log_id: Number(careLogId),
+    user_id: user.id,
+  });
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  revalidatePath("/feed");
+  return { ok: true, message: "Liked." };
+}
+//Comments
+export async function createCareLogComment(
+  _prevState: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const supabase = await createSupabaseServerClient();
+
+  const careLogId = formData.get("care_log_id")?.toString();
+  const body = formData.get("body")?.toString().trim();
+
+  if (!careLogId || !body) {
+    return { ok: false, message: "Comment cannot be empty." };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, message: "You must be logged in." };
+  }
+
+  const { error } = await supabase.from("care_log_comments").insert({
+    care_log_id: Number(careLogId),
+    user_id: user.id,
+    body,
+  });
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  revalidatePath("/feed");
+
+  return { ok: true, message: "Comment added." };
+}
