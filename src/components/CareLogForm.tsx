@@ -66,7 +66,7 @@ export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
 
       <div>
         <label className="mb-2 block font-medium">Photo</label>
-        <CompressedImageInput id="photo" name="photo" />
+        <CompressedImageInput id="photos" name="photos" multiple />{" "}
       </div>
 
       <button type="submit" className="submit-button">

@@ -254,6 +254,7 @@ export async function createCareLog(formData: FormData) {
   "use server";
 
   const supabase = await createSupabaseServerClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -261,23 +262,51 @@ export async function createCareLog(formData: FormData) {
   if (!user) {
     throw new Error("You must be logged in.");
   }
+
   const plantId = formData.get("plant_id")?.toString();
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
-  const photo = formData.get("photo") as File | null;
-  const isPrivate = formData.get("is_private") === "on";
   const containerType =
     formData.get("container_type")?.toString().trim() || null;
+  const isPrivate = formData.get("is_private") === "on";
+
+  const photos = formData
+    .getAll("photos")
+    .filter((file): file is File => file instanceof File && file.size > 0);
+
   if (!plantId || !actionType || !actionDate) {
     throw new Error("Plant ID, action type, and action date are required.");
   }
 
-  let photoUrl: string | null = null;
+  const { data: createdLog, error } = await supabase
+    .from("care_logs")
+    .insert({
+      plant_id: Number(plantId),
+      user_id: user.id,
+      action_type: actionType,
+      action_date: actionDate,
+      notes,
+      is_private: isPrivate,
+      photo_url: null,
+    })
+    .select("id")
+    .single();
 
-  if (photo && photo.size > 0) {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const uploadedPhotos: {
+    care_log_id: number;
+    user_id: string;
+    photo_url: string;
+    storage_path: string;
+  }[] = [];
+
+  for (const [index, photo] of photos.entries()) {
     const fileExt = photo.name.split(".").pop();
-    const filePath = `${plantId}/${Date.now()}.${fileExt}`;
+    const filePath = `${plantId}/${createdLog.id}-${Date.now()}-${index}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("care-log-photos")
@@ -294,21 +323,31 @@ export async function createCareLog(formData: FormData) {
       .from("care-log-photos")
       .getPublicUrl(filePath);
 
-    photoUrl = data.publicUrl;
+    uploadedPhotos.push({
+      care_log_id: createdLog.id,
+      user_id: user.id,
+      photo_url: data.publicUrl,
+      storage_path: filePath,
+    });
   }
 
-  const { error } = await supabase.from("care_logs").insert({
-    plant_id: Number(plantId),
-    action_type: actionType,
-    action_date: actionDate,
-    notes,
-    is_private: isPrivate,
-    photo_url: photoUrl,
-    user_id: user.id,
-  });
-  if (error) {
-    throw new Error(error.message);
+  if (uploadedPhotos.length > 0) {
+    const { error: photosError } = await supabase
+      .from("care_log_photos")
+      .insert(uploadedPhotos);
+
+    if (photosError) {
+      throw new Error(photosError.message);
+    }
+
+    await supabase
+      .from("care_logs")
+      .update({
+        photo_url: uploadedPhotos[0].photo_url,
+      })
+      .eq("id", createdLog.id);
   }
+
   if (actionType === "repotted" && containerType) {
     const { error: plantUpdateError } = await supabase
       .from("plants")
@@ -322,7 +361,9 @@ export async function createCareLog(formData: FormData) {
       throw new Error(plantUpdateError.message);
     }
   }
+
   revalidatePath(`/plants/${plantId}`);
+  revalidatePath("/feed");
   redirect(`/plants/${plantId}`);
 }
 
