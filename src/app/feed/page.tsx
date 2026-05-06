@@ -9,9 +9,58 @@ import {
 } from "../actions/plant-actions";
 import CareLogLikeButton from "@/src/components/CareLogLikeButton";
 import { MessageCircle } from "lucide-react";
+import PhotoCarousel from "@/src/components/PhotoCarousel";
+
+type FeedCareLog = {
+  id: number;
+  plant_id: number;
+  user_id: string;
+  action_type: string;
+  action_date: string;
+  notes: string | null;
+  photo_url: string | null;
+  is_private: boolean;
+  created_at: string;
+  plants: {
+    id: number;
+    name: string;
+    user_id: string;
+    is_private: boolean;
+  };
+  profiles: {
+    id: string;
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+  care_log_photos: {
+    id: number;
+    photo_url: string;
+    storage_path: string | null;
+    created_at: string;
+  }[];
+  care_log_likes: {
+    id: number;
+    user_id: string;
+  }[];
+  care_log_comments: {
+    id: number;
+    body: string;
+    created_at: string;
+    profiles: {
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  }[];
+};
 
 export default async function FeedPage() {
   const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: careLogs, error } = await supabase
     .from("care_logs")
@@ -32,26 +81,32 @@ export default async function FeedPage() {
           user_id,
           is_private
         ),
+        care_log_photos (
+          id,
+          photo_url,
+          storage_path,
+          created_at
+        ),
         profiles (
           id,
           username,
           full_name,
           avatar_url
         ),
-      care_log_likes (
-        id,
-        user_id
-      ),
-      care_log_comments (
-        id,
-        body,
-        created_at,
-        profiles (
-          username,
-          full_name,
-          avatar_url
+        care_log_likes (
+          id,
+          user_id
+        ),
+        care_log_comments (
+          id,
+          body,
+          created_at,
+          profiles (
+            username,
+            full_name,
+            avatar_url
+          )
         )
-      )
       `,
     )
     .eq("is_private", false)
@@ -59,9 +114,7 @@ export default async function FeedPage() {
     .order("created_at", { ascending: false });
 
   const typedCareLogs = (careLogs ?? []) as unknown as FeedCareLog[];
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="mx-auto max-w-3xl">
@@ -87,15 +140,32 @@ export default async function FeedPage() {
           <section className="mt-8 space-y-5">
             {typedCareLogs.map((log) => {
               const likeCount = log.care_log_likes?.length ?? 0;
+
               const likedByCurrentUser = Boolean(
                 user &&
                 log.care_log_likes?.some((like) => like.user_id === user.id),
               );
+
               const logMeta = getLogTypeMeta(log.action_type);
+
               const username =
                 log.profiles?.username ??
                 log.profiles?.full_name ??
                 "Unknown grower";
+
+              const photos =
+                log.care_log_photos && log.care_log_photos.length > 0
+                  ? log.care_log_photos
+                  : log.photo_url
+                    ? [
+                        {
+                          id: log.id,
+                          photo_url: log.photo_url,
+                          storage_path: null,
+                          created_at: log.created_at,
+                        },
+                      ]
+                    : [];
 
               return (
                 <article
@@ -148,15 +218,13 @@ export default async function FeedPage() {
                     </p>
                   )}
 
-                  {log.photo_url && (
-                    <div className="mt-4 flex max-h-[28rem] w-full items-center justify-center overflow-hidden rounded bg-black/5">
-                      <img
-                        src={log.photo_url}
-                        alt={`Care log photo for ${log.plants.name}`}
-                        className="max-h-[28rem] w-auto object-contain"
-                      />
-                    </div>
+                  {photos.length > 0 && (
+                    <PhotoCarousel
+                      photos={photos}
+                      altBase={`Care log photo for ${log.plants.name}`}
+                    />
                   )}
+
                   <div className="mt-4 flex items-center gap-3 border-t border-[#4a2c14]/10 pt-3 text-sm text-[#5b4636]">
                     <CareLogLikeButton
                       careLogId={log.id}

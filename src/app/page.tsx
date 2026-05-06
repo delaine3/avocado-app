@@ -8,8 +8,20 @@ import EditPlantButton from "../components/EditPlantButton";
 import { formatDate, toTitleCase } from "./utilities/format";
 import { redirect } from "next/navigation";
 
+type CareLogForDashboard = {
+  plant_id: number;
+  action_date: string;
+  created_at: string;
+  photo_url: string | null;
+  care_log_photos?: {
+    id: number;
+    photo_url: string;
+  }[];
+};
+
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -17,28 +29,53 @@ export default async function HomePage() {
   if (!user) {
     redirect("/login");
   }
+
   const [{ data: plants, error }, { data: careLogs, error: careLogsError }] =
     await Promise.all([
       supabase.from("plants").select("*").eq("user_id", user.id),
       supabase
         .from("care_logs")
-        .select("plant_id, action_date, created_at, photo_url")
+        .select(
+          `
+            plant_id,
+            action_date,
+            created_at,
+            photo_url,
+            care_log_photos (
+              id,
+              photo_url
+            )
+          `,
+        )
+        .eq("user_id", user.id)
         .order("action_date", { ascending: false }),
     ]);
 
+  const typedCareLogs = (careLogs ?? []) as CareLogForDashboard[];
+
   const plantsWithCareData = ((plants as Plant[] | null) ?? [])
     .map((plant) => {
-      const plantLogs = (careLogs ?? []).filter(
+      const plantLogs = typedCareLogs.filter(
         (log) => log.plant_id === plant.id,
       );
 
       const mostRecentCareLog = plantLogs[0];
-      const mostRecentPhotoLog = plantLogs.find((log) => log.photo_url);
+
+      const mostRecentPhotoLog = plantLogs.find(
+        (log) =>
+          log.photo_url ||
+          (log.care_log_photos && log.care_log_photos.length > 0),
+      );
+
+      const recentPhotoUrl =
+        mostRecentPhotoLog?.care_log_photos?.[0]?.photo_url ??
+        mostRecentPhotoLog?.photo_url ??
+        null;
 
       return {
         ...plant,
         last_care_date: mostRecentCareLog?.action_date ?? null,
-        recent_photo_url: mostRecentPhotoLog?.photo_url ?? null,
+        recent_photo_url: recentPhotoUrl,
       };
     })
     .sort((a, b) => {
@@ -55,7 +92,7 @@ export default async function HomePage() {
     <main className="min-h-screen p-8 page">
       <div className="mx-auto max-w-5xl">
         <div
-          className="flex items-start justify-between gap-3 p-4 rounded border border-white/30 shadow-sm"
+          className="flex items-start justify-between gap-3 rounded border border-white/30 p-4 shadow-sm"
           style={{
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
@@ -88,7 +125,7 @@ export default async function HomePage() {
           {plantsWithCareData.map((plant) => (
             <div
               key={plant.id}
-              className="rounded border bg-white p-5 shadow-sm transition hover:shadow-md"
+              className="flex h-full flex-col rounded border bg-white p-5 shadow-sm transition hover:shadow-md"
               style={{
                 background:
                   "linear-gradient(147deg, #9d772d, #8d6b29, #a78542,#b19257,#9d772d,#5e471b)",
@@ -96,7 +133,7 @@ export default async function HomePage() {
             >
               <Link
                 href={`/plants/${plant.id}`}
-                className="block"
+                className="block flex-1"
                 style={{ color: "#ffffff" }}
               >
                 {plant.recent_photo_url && (
@@ -106,10 +143,13 @@ export default async function HomePage() {
                     className="mb-4 h-100 w-full rounded object-cover"
                   />
                 )}
+
                 <h2 className="text-xl font-semibold">{plant.name}</h2>
+
                 <p className="mt-2">Stage: {toTitleCase(plant.stage)}</p>
+
                 <span
-                  className={`px-2 py-1 rounded text-xs ${
+                  className={`inline-block rounded px-2 py-1 text-xs ${
                     plant.is_private
                       ? "bg-red-200 text-red-800"
                       : "bg-green-200 text-green-800"
@@ -117,22 +157,29 @@ export default async function HomePage() {
                 >
                   {plant.is_private ? "🔒 Private" : "🌍 Public"}
                 </span>
+
                 <p>
                   Last cared:{" "}
                   {plant.last_care_date
                     ? formatDate(plant.last_care_date)
                     : "No care logs yet"}
                 </p>
+
                 <p>Location: {plant.location ?? "Not set"}</p>
+
                 <p>
                   Container:{" "}
                   {plant.container_type
                     ? toTitleCase(plant.container_type)
                     : "Not set"}
                 </p>
-                {plant.notes && <p className="mt-3">{plant.notes}</p>}
+
+                {plant.notes && (
+                  <p className="mt-3 max-h-20 overflow-hidden">{plant.notes}</p>
+                )}
               </Link>
-              <div className="flex flex-wrap mt-2 items-center gap-4">
+
+              <div className="mt-auto flex flex-wrap items-center gap-4 pt-4">
                 <ActionFormButton
                   action={deletePlant}
                   hiddenFields={[{ name: "plant_id", value: plant.id }]}
@@ -159,6 +206,7 @@ export default async function HomePage() {
                 >
                   <Trash2 size={16} />
                 </ActionFormButton>
+
                 <EditPlantButton
                   action={updatePlant}
                   plant={{
@@ -170,7 +218,7 @@ export default async function HomePage() {
                     container_type: plant.container_type,
                     notes: plant.notes,
                   }}
-                />{" "}
+                />
               </div>
             </div>
           ))}

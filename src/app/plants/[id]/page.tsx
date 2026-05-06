@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Plant } from "../../../types/plant";
 import type { CareLog } from "../../../types/care-log";
 import {
@@ -15,14 +14,22 @@ import { formatDate, toTitleCase } from "../../utilities/format";
 import PlantTypeaheadSelect from "@/src/components/PlantTypeaheadSelect";
 import CareLogForm from "@/src/components/CareLogForm";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
-import { redirect } from "next/navigation";
 import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
+import PhotoCarousel from "@/src/components/PhotoCarousel";
 
 interface PlantDetailPageProps {
   params: Promise<{
     id: string;
   }>;
 }
+
+type PlantWithProfile = Plant & {
+  profiles?: {
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+};
 
 export default async function PlantDetailPage({
   params,
@@ -37,10 +44,11 @@ export default async function PlantDetailPage({
   if (!user) {
     redirect("/login");
   }
+
   const [
     { data: plant, error: plantError },
     { data: careLogs, error: careLogsError },
-    { data: allPlants, error: allPlantsError },
+    { data: allPlants },
   ] = await Promise.all([
     supabase
       .from("plants")
@@ -56,11 +64,23 @@ export default async function PlantDetailPage({
       )
       .eq("id", id)
       .single(),
+
     supabase
       .from("care_logs")
-      .select("*")
+      .select(
+        `
+          *,
+          care_log_photos (
+            id,
+            photo_url,
+            storage_path,
+            created_at
+          )
+        `,
+      )
       .eq("plant_id", id)
       .order("action_date", { ascending: false }),
+
     supabase
       .from("plants")
       .select("id, name")
@@ -71,7 +91,8 @@ export default async function PlantDetailPage({
   if (plantError || !plant) {
     notFound();
   }
-  const typedPlant = plant as Plant;
+
+  const typedPlant = plant as PlantWithProfile;
   const typedCareLogs = (careLogs ?? []) as CareLog[];
 
   const plantOptions = (
@@ -81,20 +102,27 @@ export default async function PlantDetailPage({
     name: plant.name,
   }));
 
-  const isOwner = typedPlant.user_id == user.id;
+  const isOwner = typedPlant.user_id === user.id;
+
   const owner =
-    plant.profiles?.username ?? plant.profiles?.full_name ?? "Unknown";
+    typedPlant.profiles?.username ??
+    typedPlant.profiles?.full_name ??
+    "Unknown";
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="page-header mb-6"></div>
+
       <div className="page-header">
-        <h1 className="title"> Plant Profile</h1>
+        <h1 className="title">Plant Profile</h1>
+
         <h1 className="title-sm">
-          {toTitleCase(owner)}'s plant {typedPlant.name}
+          {toTitleCase(owner)}&apos;s plant {typedPlant.name}
         </h1>
-        <p className="">{typedPlant.notes ?? "No notes yet."}</p>
+
+        <p>{typedPlant.notes ?? "No notes yet."}</p>
       </div>
+
       <div className="field-form">
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="mt-4">
@@ -102,7 +130,8 @@ export default async function PlantDetailPage({
               <span className="plant-label">Plant Name:</span>
               <span className="plant-name-value">{typedPlant.name}🌱🥑</span>
             </h1>
-            {isOwner == true && (
+
+            {isOwner && (
               <EditPlantButton
                 action={updatePlant}
                 plant={{
@@ -118,8 +147,8 @@ export default async function PlantDetailPage({
             )}
           </div>
 
-          <div className="flex w-full flex-col mt-4 items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
-            {isOwner == true && (
+          <div className="mt-4 flex w-full flex-col items-start gap-3 sm:w-auto sm:items-end md:ml-auto">
+            {isOwner && (
               <PlantTypeaheadSelect
                 plants={plantOptions}
                 currentPlantId={typedPlant.id}
@@ -130,24 +159,31 @@ export default async function PlantDetailPage({
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded border p-5">
-            <h2 className="text-lg font-semibold">Stage: </h2>
+            <h2 className="text-lg font-semibold">Stage</h2>
             <p className="mt-2">{toTitleCase(typedPlant.stage)}</p>
           </div>
+
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Started</h2>
             <p className="mt-2">
-              {formatDate(typedPlant.started_at) ?? "Not set"}
+              {typedPlant.started_at
+                ? formatDate(typedPlant.started_at)
+                : "Not set"}
             </p>
           </div>
+
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Location</h2>
             <p className="mt-2">{typedPlant.location ?? "Not set"}</p>
           </div>
+
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Visibility</h2>
-
-            <p className="mt-2"> {plant.is_private ? "Private" : "Public"}</p>
+            <p className="mt-2">
+              {typedPlant.is_private ? "🔒 Private" : "🌍 Public"}
+            </p>
           </div>
+
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2">
@@ -156,6 +192,7 @@ export default async function PlantDetailPage({
                 : "Not set"}
             </p>
           </div>
+
           <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Created</h2>
             <p className="mt-2">{formatDate(typedPlant.created_at)}</p>
@@ -163,9 +200,11 @@ export default async function PlantDetailPage({
         </section>
 
         <section
-          className={`mt-8 grid grid-cols-1 gap-4 sm:grid-cols-${isOwner == true ? 2 : 1}`}
+          className={`mt-8 grid grid-cols-1 gap-4 ${
+            isOwner ? "sm:grid-cols-2" : ""
+          }`}
         >
-          {isOwner == true && (
+          {isOwner && (
             <div className="rounded border p-5">
               <h2 className="text-lg font-semibold">Add Care Log</h2>
               <CareLogForm
@@ -174,15 +213,18 @@ export default async function PlantDetailPage({
               />
             </div>
           )}
+
           <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
+
             {careLogsError && (
-              <p className="mt-3  text-red-600">
+              <p className="mt-3 text-red-600">
                 Failed to load care logs: {careLogsError.message}
               </p>
             )}
+
             {typedCareLogs.length === 0 ? (
-              <p className="mt-3  ">No care logs yet.</p>
+              <p className="mt-3">No care logs yet.</p>
             ) : (
               <div className="mt-4 flex-1 overflow-y-auto pr-2">
                 <div className="space-y-3">
@@ -192,44 +234,42 @@ export default async function PlantDetailPage({
                     return (
                       <div
                         key={log.id}
-                        className="rounded p-4 space-y-2"
+                        className="space-y-2 rounded p-4"
                         style={{ background: "rgba(37, 149, 190, 0.31)" }}
                       >
-                        <div className="flex items-start font-medium justify-between">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <span
-                              className={`inline-flex max-w-full items-center gap-1 rounded px-2.5 py-1 text-[10px] sm:px-3 sm:text-xs font-semibold uppercase tracking-normal sm:tracking-wide whitespace-nowrap ${logMeta.className}`}
-                            >
-                              <span className=" leading-none">
-                                {logMeta.icon}
-                              </span>
-                              {logMeta.label}
-                            </span>
-                          </div>
+                        <div className="flex items-start justify-between gap-3 font-medium">
+                          <span
+                            className={`inline-flex max-w-full items-center gap-1 whitespace-nowrap rounded px-2.5 py-1 text-[10px] font-semibold uppercase tracking-normal sm:px-3 sm:text-xs sm:tracking-wide ${logMeta.className}`}
+                          >
+                            <span className="leading-none">{logMeta.icon}</span>
+                            {logMeta.label}
+                          </span>
+
                           <div
-                            className={`px-2 py-1 rounded text-xs ${
+                            className={`rounded px-2 py-1 text-xs ${
                               log.is_private
                                 ? "bg-red-200 text-red-800"
                                 : "bg-green-200 text-green-800"
                             }`}
                           >
                             {log.is_private ? "🔒 Private" : "🌍 Public"}
-                          </div>{" "}
+                          </div>
                         </div>
+
                         <div style={{ color: "#2596be" }}>
-                          <div>{formatDate(log.action_date)} </div>
+                          <div>{formatDate(log.action_date)}</div>
                           <p>{log.notes ?? "No notes recorded."}</p>
                         </div>
-                        {log.photo_url ? (
-                          <div className="mt-3 flex max-h-80 w-full items-center justify-center overflow-hidden rounded bg-black/5">
-                            <img
-                              src={log.photo_url}
-                              alt={`Care log photo for ${typedPlant.name}`}
-                              className="max-h-80 w-auto object-contain"
+
+                        {log.care_log_photos &&
+                          log.care_log_photos.length > 0 && (
+                            <PhotoCarousel
+                              photos={log.care_log_photos}
+                              altBase={`Care log photo for ${typedPlant.name}`}
                             />
-                          </div>
-                        ) : null}
-                        {isOwner == true && (
+                          )}
+
+                        {isOwner && (
                           <div className="flex flex-wrap items-center gap-2">
                             <EditCareLogButton
                               action={updateCareLog}
@@ -245,6 +285,7 @@ export default async function PlantDetailPage({
                                 icon: true,
                               }}
                             />
+
                             <ActionFormButton
                               action={deleteCareLog}
                               hiddenFields={[

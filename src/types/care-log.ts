@@ -18,4 +18,10 @@ export interface CareLog {
   photo_url: string | null;
   container_type: string;
   is_private: boolean;
+  care_log_photos?: {
+    id: number;
+    photo_url: string;
+    storage_path: string | null;
+    created_at: string;
+  }[];
 }
