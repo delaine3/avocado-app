@@ -417,5 +417,6 @@ export async function createCareLogComment(
   }
 
   revalidatePath("/feed");
+
   return { ok: true, message: "Comment added." };
 }

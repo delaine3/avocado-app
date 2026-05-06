@@ -20,4 +20,18 @@ type FeedCareLog = {
     full_name: string | null;
     avatar_url: string | null;
   } | null;
+  care_log_likes: {
+    id: number;
+    user_id: string;
+  }[];
+  care_log_comments: {
+    id: number;
+    body: string;
+    created_at: string;
+    profiles: {
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  }[];
 };
