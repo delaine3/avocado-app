@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import type { ActionResult } from "../app/actions/plant-actions";
+import PlantStageTypeahead from "./PlantStageTypeahead";
+import { toTitleCase } from "../app/utilities/format";
 
 type EditPlantButtonProps = {
   action: (
@@ -105,30 +107,7 @@ export default function EditPlantButton({
                     className="w-full rounded border px-4 py-3 outline-none"
                   />
                 </div>
-
-                <div>
-                  <label
-                    htmlFor={`stage_${plant.id}`}
-                    className="mb-2 block  font-medium"
-                  >
-                    Stage
-                  </label>
-
-                  <select
-                    id="stage"
-                    name="stage"
-                    required
-                    className="w-full rounded border px-4 py-3 outline-none ring-0"
-                    defaultValue={plant.stage ?? ""}
-                  >
-                    <option value="dormant">Dormant</option>
-                    <option value="cracked">Cracked</option>
-                    <option value="rooting">Rooting</option>
-                    <option value="stem_emerging">Stem Emerging</option>
-                    <option value="leafing">Leafing</option>
-                    <option value="potted">Potted</option>
-                  </select>
-                </div>
+                <PlantStageTypeahead defaultValue={plant.stage} />
 
                 <div>
                   <label
@@ -152,7 +131,9 @@ export default function EditPlantButton({
                   <label className="mb-2 block font-medium">
                     New Container Type
                   </label>
-                  <div className="bg-blue">{plant.container_type}</div>
+                  <div className="bg-blue">
+                    {toTitleCase(plant.container_type)}
+                  </div>
                   <select
                     name="container_type"
                     className="w-full rounded border px-4 py-3 outline-none"

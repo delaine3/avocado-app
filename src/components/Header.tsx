@@ -81,7 +81,7 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 sm:flex">
-            <div className="border-l-2 border-white pl-2">
+            <div className="pl-2">
               <Link
                 className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
                 href="/"
