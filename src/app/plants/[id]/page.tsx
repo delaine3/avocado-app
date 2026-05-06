@@ -135,13 +135,17 @@ export default async function PlantDetailPage({
               <EditPlantButton
                 action={updatePlant}
                 plant={{
-                  id: typedPlant.id,
-                  name: typedPlant.name,
-                  started_at: typedPlant.started_at,
-                  stage: typedPlant.stage,
-                  location: typedPlant.location,
-                  container_type: typedPlant.container_type,
-                  notes: typedPlant.notes,
+                  id: plant.id,
+                  name: plant.name,
+                  started_at: plant.started_at,
+                  stage: plant.stage,
+                  location: plant.location,
+                  container_type: plant.container_type,
+                  notes: plant.notes,
+                  user_id: plant.user_id,
+                  is_private: plant.is_private,
+                  created_at: plant.created_at,
+                  updated_at: plant.updated_at,
                 }}
               />
             )}
@@ -275,14 +279,16 @@ export default async function PlantDetailPage({
                               action={updateCareLog}
                               log={{
                                 id: log.id,
-                                plant_name: typedPlant.name,
-                                plant_stage: typedPlant.stage,
-                                container_type: typedPlant.container_type,
                                 plant_id: typedPlant.id,
+                                plant_name: typedPlant.name,
                                 action_type: log.action_type,
                                 action_date: log.action_date,
                                 notes: log.notes,
-                                icon: true,
+                                created_at: log.created_at,
+                                photo_url: log.photo_url,
+                                container_type: typedPlant.container_type,
+                                is_private: log.is_private,
+                                care_log_photos: log.care_log_photos,
                               }}
                             />
 

@@ -11,12 +11,13 @@ export type CareActionType =
 export interface CareLog {
   id: number;
   plant_id: number;
+  plant_name?: string;
   action_type: CareActionType | string;
   action_date: string;
   notes: string | null;
   created_at: string;
   photo_url: string | null;
-  container_type: string;
+  container_type?: string | null;
   is_private: boolean;
   care_log_photos?: {
     id: number;

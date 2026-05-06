@@ -217,6 +217,10 @@ export default async function HomePage() {
                     location: plant.location,
                     container_type: plant.container_type,
                     notes: plant.notes,
+                    user_id: plant.user_id,
+                    is_private: plant.is_private,
+                    created_at: plant.created_at,
+                    updated_at: plant.updated_at,
                   }}
                 />
               </div>
