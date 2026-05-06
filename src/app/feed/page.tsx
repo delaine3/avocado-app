@@ -8,6 +8,7 @@ import {
   toggleCareLogLike,
 } from "../actions/plant-actions";
 import CareLogLikeButton from "@/src/components/CareLogLikeButton";
+import { MessageCircle } from "lucide-react";
 
 export default async function FeedPage() {
   const supabase = await createSupabaseServerClient();
@@ -164,8 +165,9 @@ export default async function FeedPage() {
                       action={toggleCareLogLike}
                     />
 
-                    <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
-                      {log.care_log_comments?.length ?? 0} comments
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-3 py-1 font-semibold">
+                      <MessageCircle size={16} />
+                      {log.care_log_comments?.length ?? 0}
                     </span>
                   </div>
 
