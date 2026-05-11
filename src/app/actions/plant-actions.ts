@@ -164,6 +164,7 @@ export async function updatePlant(
     formData.get("container_type")?.toString().trim() || null;
   const notes = formData.get("notes")?.toString().trim() || null;
   const isPrivate = formData.get("is_private") === "on";
+  const inSoil = formData.get("in_soil") === "on";
 
   if (!plantId || !name) {
     return { ok: false, message: "Plant ID and name are required." };
@@ -179,6 +180,7 @@ export async function updatePlant(
       container_type: containerType,
       notes,
       is_private: isPrivate,
+      in_soil: inSoil,
     })
     .eq("id", Number(plantId));
 
@@ -192,47 +194,96 @@ export async function updatePlant(
 
   return { ok: true, message: "Plant updated." };
 }
+function containerIsSoil(containerType: string | null) {
+  if (!containerType) return false;
 
+  return [
+    "small_pot",
+    "medium_pot",
+    "large_pot",
+    "terracotta_pot",
+    "ceramic_pot",
+    "plastic_pot",
+    "planter_box",
+    "grow_bag",
+    "outdoor_ground",
+    "raised_bed",
+  ].includes(containerType);
+}
+
+function stageFromContainer(containerType: string | null) {
+  if (!containerType) return null;
+
+  if (containerType === "outdoor_ground" || containerType === "raised_bed") {
+    return "outdoor";
+  }
+
+  if (containerIsSoil(containerType)) {
+    return "potted";
+  }
+
+  return null;
+}
 //Create Care Log for all plants
 export async function createCareLogForAllPlants(
   _prevState: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be logged in.");
+    return { ok: false, message: "You must be logged in." };
   }
+
   const actionType = formData.get("action_type")?.toString();
   const actionDate = formData.get("action_date")?.toString();
   const notes = formData.get("notes")?.toString().trim() || null;
   const isPrivate = formData.get("is_private") === "on";
+  const careGroup = formData.get("care_group")?.toString() || "all";
+
   if (!actionType || !actionDate) {
     return { ok: false, message: "Log type and date are required." };
   }
 
-  const { data: plants, error: plantsError } = await supabase
-    .from("plants")
-    .select("id");
+  let plantsQuery = supabase.from("plants").select("id").eq("user_id", user.id);
+
+  if (careGroup === "soil") {
+    plantsQuery = plantsQuery.eq("in_soil", true);
+  }
+
+  if (careGroup === "water") {
+    plantsQuery = plantsQuery.eq("in_soil", false);
+  }
+
+  const { data: plants, error: plantsError } = await plantsQuery;
 
   if (plantsError) {
     return { ok: false, message: plantsError.message };
   }
 
   if (!plants || plants.length === 0) {
-    return { ok: false, message: "No plants found." };
+    return {
+      ok: false,
+      message:
+        careGroup === "soil"
+          ? "No soil plants found."
+          : careGroup === "water"
+            ? "No water-propagation plants found."
+            : "No plants found.",
+    };
   }
 
   const logsToInsert = plants.map((plant) => ({
     plant_id: plant.id,
+    user_id: user.id,
     action_type: actionType,
     action_date: actionDate,
     is_private: isPrivate,
     notes,
-    user_id: user.id,
   }));
 
   const { error } = await supabase.from("care_logs").insert(logsToInsert);
@@ -242,6 +293,7 @@ export async function createCareLogForAllPlants(
   }
 
   revalidatePath("/");
+  revalidatePath("/feed");
 
   for (const plant of plants) {
     revalidatePath(`/plants/${plant.id}`);
@@ -353,12 +405,24 @@ export async function createCareLog(formData: FormData) {
   }
 
   if (actionType === "repotted" && containerType) {
+    const nextStage = stageFromContainer(containerType);
+
+    const plantUpdatePayload: {
+      container_type: string;
+      in_soil: boolean;
+      stage?: string;
+    } = {
+      container_type: containerType,
+      in_soil: containerIsSoil(containerType),
+    };
+
+    if (nextStage) {
+      plantUpdatePayload.stage = nextStage;
+    }
+
     const { error: plantUpdateError } = await supabase
       .from("plants")
-      .update({
-        container_type: containerType,
-        stage: "potted",
-      })
+      .update(plantUpdatePayload)
       .eq("id", Number(plantId));
 
     if (plantUpdateError) {
@@ -367,7 +431,9 @@ export async function createCareLog(formData: FormData) {
   }
 
   revalidatePath(`/plants/${plantId}`);
+  revalidatePath("/");
   revalidatePath("/feed");
+
   redirect(`/plants/${plantId}`);
 }
 

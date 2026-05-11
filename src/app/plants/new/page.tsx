@@ -108,6 +108,16 @@ export default function NewPlantPage() {
           />
         </div>
         <div>
+          <label className="flex items-center gap-3">
+            <input type="checkbox" name="in_soil" className="h-6 w-6" />
+            <span className="font-medium">This plant is in soil</span>
+          </label>
+
+          <p className="mt-2 text-sm text-stone-500">
+            Soil plants get watered. Water-propagation plants get water changes.
+          </p>
+        </div>
+        <div>
           <span>Keep this plant private?</span>
           <label className="flex items-center gap-2">
             <input type="checkbox" name="is_private" className="h-8 w-8" />
