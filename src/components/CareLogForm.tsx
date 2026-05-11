@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 import CompressedImageInput from "./CompressedImageInput";
 import { createCareLog } from "../app/actions/plant-actions";
 import ContainerTypeahead from "./ContainerTypeahead";
@@ -14,8 +15,20 @@ type CareLogFormProps = {
 export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
   const [selectedActionType, setSelectedActionType] = useState("");
 
+  const [state, formAction, pending] = useActionState(createCareLog, null);
+
+  useEffect(() => {
+    if (!state) return;
+
+    if (state.ok) {
+      toast.success(state.message);
+    } else {
+      toast.error(state.message);
+    }
+  }, [state]);
+
   return (
-    <form action={createCareLog} className="mt-4 space-y-4">
+    <form action={formAction} className="mt-4 space-y-4">
       <input type="hidden" name="plant_id" value={plantId} />
 
       <ActionTypeahead
@@ -65,12 +78,12 @@ export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">Photo</label>
-        <CompressedImageInput id="photos" name="photos" multiple />{" "}
+        <label className="mb-2 block font-medium">Photos</label>
+        <CompressedImageInput id="photos" name="photos" multiple />
       </div>
 
-      <button type="submit" className="submit-button">
-        Save Care Log
+      <button type="submit" disabled={pending} className="submit-button">
+        {pending ? "Saving..." : "Save Care Log"}
       </button>
     </form>
   );
