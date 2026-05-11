@@ -306,9 +306,10 @@ export async function createCareLogForAllPlants(
 }
 
 //Create Care Log
-export async function createCareLog(formData: FormData) {
-  "use server";
-
+export async function createCareLog(
+  _prevState: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -316,7 +317,7 @@ export async function createCareLog(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be logged in.");
+    return { ok: false, message: "You must be logged in." };
   }
 
   const plantId = formData.get("plant_id")?.toString();
@@ -332,7 +333,10 @@ export async function createCareLog(formData: FormData) {
     .filter((file): file is File => file instanceof File && file.size > 0);
 
   if (!plantId || !actionType || !actionDate) {
-    throw new Error("Plant ID, action type, and action date are required.");
+    return {
+      ok: false,
+      message: "Plant ID, log type, and care date are required.",
+    };
   }
 
   const { data: createdLog, error } = await supabase
@@ -350,7 +354,7 @@ export async function createCareLog(formData: FormData) {
     .single();
 
   if (error) {
-    throw new Error(error.message);
+    return { ok: false, message: error.message };
   }
 
   const uploadedPhotos: {
@@ -372,7 +376,7 @@ export async function createCareLog(formData: FormData) {
       });
 
     if (uploadError) {
-      throw new Error(uploadError.message);
+      return { ok: false, message: uploadError.message };
     }
 
     const { data } = supabase.storage
@@ -393,15 +397,19 @@ export async function createCareLog(formData: FormData) {
       .insert(uploadedPhotos);
 
     if (photosError) {
-      throw new Error(photosError.message);
+      return { ok: false, message: photosError.message };
     }
 
-    await supabase
+    const { error: updatePhotoError } = await supabase
       .from("care_logs")
       .update({
         photo_url: uploadedPhotos[0].photo_url,
       })
       .eq("id", createdLog.id);
+
+    if (updatePhotoError) {
+      return { ok: false, message: updatePhotoError.message };
+    }
   }
 
   if (actionType === "repotted" && containerType) {
@@ -426,7 +434,7 @@ export async function createCareLog(formData: FormData) {
       .eq("id", Number(plantId));
 
     if (plantUpdateError) {
-      throw new Error(plantUpdateError.message);
+      return { ok: false, message: plantUpdateError.message };
     }
   }
 
