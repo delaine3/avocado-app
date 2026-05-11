@@ -12,9 +12,46 @@ type Props = {
   ) => Promise<ActionResult>;
 };
 
+type CareGroup = "all" | "soil" | "water";
+
+const actionOptionsByCareGroup: Record<
+  CareGroup,
+  { value: string; label: string }[]
+> = {
+  all: [
+    { value: "general_update", label: "General Update" },
+    { value: "leaf_growth", label: "Leaf Growth" },
+    { value: "moved_location", label: "Moved Location" },
+    { value: "sunlight_adjusted", label: "Sunlight Adjusted" },
+  ],
+  soil: [
+    { value: "watered", label: "Watered" },
+    { value: "leaf_growth", label: "Leaf Growth" },
+    { value: "stem_growth", label: "Stem Growth" },
+    { value: "fertilized", label: "Fertilized" },
+    { value: "pruned", label: "Pruned" },
+    { value: "pest_check", label: "Pest Check" },
+    { value: "mulched", label: "Mulched" },
+    { value: "weather_note", label: "Weather Note" },
+    { value: "general_update", label: "General Update" },
+  ],
+  water: [
+    { value: "water_change", label: "Water Change" },
+    { value: "root_growth", label: "Root Growth" },
+    { value: "seed_crack", label: "Seed Crack" },
+    { value: "stem_growth", label: "Stem Growth" },
+    { value: "leaf_growth", label: "Leaf Growth" },
+    { value: "general_update", label: "General Update" },
+  ],
+};
+
 export default function BulkCareLogForm({ action }: Props) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [careGroup, setCareGroup] = useState<CareGroup>("all");
+  const [actionType, setActionType] = useState(
+    actionOptionsByCareGroup.all[0].value,
+  );
 
   const [state, formAction, pending] = useActionState(action, null);
 
@@ -33,6 +70,13 @@ export default function BulkCareLogForm({ action }: Props) {
     }
   }, [state]);
 
+  const actionOptions = actionOptionsByCareGroup[careGroup];
+
+  function handleCareGroupChange(value: CareGroup) {
+    setCareGroup(value);
+    setActionType(actionOptionsByCareGroup[value][0].value);
+  }
+
   const modal = (
     <div className="modal-overlay" onClick={() => setOpen(false)}>
       <div
@@ -40,26 +84,50 @@ export default function BulkCareLogForm({ action }: Props) {
         onClick={(event) => event.stopPropagation()}
         style={{ backgroundColor: "#fffaf1", color: "#4d370f" }}
       >
-        <h1 className="text-xl sm:text-2xl">Add Log To All Plants</h1>
+        <h1 className="text-xl sm:text-2xl">Add Log To Multiple Plants</h1>
 
-        <p className="mt-2">Apply one care log entry to every plant.</p>
+        <p className="mt-2">Apply one care log entry to a care group.</p>
 
         <form action={formAction} className="mt-6 space-y-4">
+          <div>
+            <label className="bulk-log-label">Plant Group</label>
+            <select
+              name="care_group"
+              className="bulk-log-input"
+              value={careGroup}
+              onChange={(event) =>
+                handleCareGroupChange(event.target.value as CareGroup)
+              }
+            >
+              <option value="all">All plants</option>
+              <option value="soil">Soil plants only</option>
+              <option value="water">Water plants only</option>
+            </select>
+          </div>
+
           <div>
             <label className="bulk-log-label">Log Type</label>
             <select
               name="action_type"
               required
-              defaultValue="water_change"
+              value={actionType}
+              onChange={(event) => setActionType(event.target.value)}
               className="bulk-log-input"
             >
-              <option value="water_change">Water Change</option>
-              <option value="root_growth">Root Growth</option>
-              <option value="leaf_growth">Leaf Growth</option>
-              <option value="seed_crack">Seed Crack</option>
-              <option value="general_update">General Update</option>
-              <option value="repotted">Repotted</option>
+              {actionOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
+
+            <p className="mt-2 text-sm text-stone-600">
+              {careGroup === "soil"
+                ? "Soil plants can be watered, fertilized, pruned, checked, or updated."
+                : careGroup === "water"
+                  ? "Water plants can get water changes and early growth updates."
+                  : "All plants only shows actions that make sense for every plant."}
+            </p>
           </div>
 
           <div>
@@ -79,7 +147,13 @@ export default function BulkCareLogForm({ action }: Props) {
               name="notes"
               rows={4}
               className="bulk-log-input"
-              placeholder="Changed water for everyone, cleaned jars, checked roots..."
+              placeholder={
+                careGroup === "soil"
+                  ? "Watered soil plants, checked leaves, rotated pots..."
+                  : careGroup === "water"
+                    ? "Changed water, cleaned jars, checked roots..."
+                    : "General update for the plant squad..."
+              }
             />
           </div>
 

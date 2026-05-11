@@ -137,7 +137,22 @@ export default function EditPlantButton({
                   placeholder="Earth is recovering, Future Tree is cracking, Flora is thriving..."
                 />
               </div>
+              <div>
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="in_soil"
+                    defaultChecked={plant.in_soil}
+                    className="h-6 w-6"
+                  />
+                  <span className="font-medium">This plant is in soil</span>
+                </label>
 
+                <p className="mt-2 text-sm text-stone-500">
+                  Soil plants get watered. Water-propagation plants get water
+                  changes.
+                </p>
+              </div>
               <div>
                 <label className="flex items-center gap-3">
                   <input

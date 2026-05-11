@@ -21,4 +21,5 @@ export interface Plant {
   updated_at: string;
   label?: string;
   is_private: boolean;
+  in_soil: boolean;
 }

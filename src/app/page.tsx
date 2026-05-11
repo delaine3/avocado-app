@@ -221,6 +221,7 @@ export default async function HomePage() {
                     is_private: plant.is_private,
                     created_at: plant.created_at,
                     updated_at: plant.updated_at,
+                    in_soil: plant.in_soil,
                   }}
                 />
               </div>
