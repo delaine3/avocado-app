@@ -1,3 +1,5 @@
+import { CareActionType } from "./care-log";
+
 export type PlantStage =
   | "dormant"
   | "cracked"
@@ -23,4 +25,5 @@ export interface Plant {
   is_private: boolean;
   in_soil: boolean;
   parent_plant_id: number | null;
+  most_recent_action: CareActionType | string;
 }
