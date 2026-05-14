@@ -222,6 +222,7 @@ export default async function HomePage() {
                     created_at: plant.created_at,
                     updated_at: plant.updated_at,
                     in_soil: plant.in_soil,
+                    parent_plant_id: plant.parent_plant_id,
                   }}
                 />
               </div>

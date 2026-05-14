@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Plant } from "../../../types/plant";
 import type { CareLog } from "../../../types/care-log";
@@ -16,6 +17,8 @@ import CareLogForm from "@/src/components/CareLogForm";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
 import PhotoCarousel from "@/src/components/PhotoCarousel";
+import CreateChildPlantButton from "@/src/components/CreateChildPlantButton";
+import { createChildPlant } from "../new/actions";
 
 interface PlantDetailPageProps {
   params: Promise<{
@@ -31,10 +34,29 @@ type PlantWithProfile = Plant & {
   } | null;
 };
 
+type ParentPlant = {
+  id: number;
+  name: string;
+} | null;
+
+type ChildPlant = {
+  id: number;
+  name: string;
+  stage: string | null;
+  in_soil: boolean;
+  is_private: boolean;
+};
+
 export default async function PlantDetailPage({
   params,
 }: PlantDetailPageProps) {
   const { id } = await params;
+  const plantId = Number(id);
+
+  if (Number.isNaN(plantId)) {
+    notFound();
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -49,15 +71,15 @@ export default async function PlantDetailPage({
     .from("plants")
     .select(
       `
-      *,
-      profiles (
-        username,
-        full_name,
-        avatar_url
-      )
-    `,
+        *,
+        profiles (
+          username,
+          full_name,
+          avatar_url
+        )
+      `,
     )
-    .eq("id", id)
+    .eq("id", plantId)
     .single();
 
   if (plantError || !plant) {
@@ -75,31 +97,54 @@ export default async function PlantDetailPage({
     .from("care_logs")
     .select(
       `
-      *,
-      care_log_photos (
-        id,
-        photo_url,
-        storage_path,
-        created_at
-      )
-    `,
+        *,
+        care_log_photos (
+          id,
+          photo_url,
+          storage_path,
+          created_at
+        )
+      `,
     )
-    .eq("plant_id", id)
+    .eq("plant_id", plantId)
     .order("action_date", { ascending: false });
 
   if (!isOwner) {
     careLogsQuery = careLogsQuery.eq("is_private", false);
   }
 
-  const { data: careLogs, error: careLogsError } = await careLogsQuery;
+  const [
+    { data: careLogs, error: careLogsError },
+    { data: allPlants },
+    { data: childPlants },
+    { data: parentPlant },
+  ] = await Promise.all([
+    careLogsQuery,
 
-  const { data: allPlants } = await supabase
-    .from("plants")
-    .select("id, name")
-    .eq("user_id", user.id)
-    .order("name", { ascending: true });
+    supabase
+      .from("plants")
+      .select("id, name")
+      .eq("user_id", user.id)
+      .order("name", { ascending: true }),
+
+    supabase
+      .from("plants")
+      .select("id, name, stage, in_soil, is_private")
+      .eq("parent_plant_id", plantId)
+      .order("name", { ascending: true }),
+
+    typedPlant.parent_plant_id
+      ? supabase
+          .from("plants")
+          .select("id, name")
+          .eq("id", typedPlant.parent_plant_id)
+          .single()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
 
   const typedCareLogs = (careLogs ?? []) as CareLog[];
+  const typedChildPlants = (childPlants ?? []) as ChildPlant[];
+  const typedParentPlant = parentPlant as ParentPlant;
 
   const plantOptions = (
     (allPlants ?? []) as { id: number; name: string }[]
@@ -124,7 +169,19 @@ export default async function PlantDetailPage({
           {toTitleCase(owner)}&apos;s plant {typedPlant.name}
         </h1>
 
-        <p>{typedPlant.notes ?? "No notes yet."}</p>
+        {typedParentPlant && (
+          <p className="mt-2 text-3xl">
+            Split from{"  "}
+            <Link
+              href={`/plants/${typedParentPlant.id}`}
+              className="font-semibold underline"
+            >
+              {typedParentPlant.name}
+            </Link>
+          </p>
+        )}
+
+        <p>{typedPlant.notes ?? ""}</p>
       </div>
 
       <div className="field-form">
@@ -136,23 +193,27 @@ export default async function PlantDetailPage({
             </h1>
 
             {isOwner && (
-              <EditPlantButton
-                action={updatePlant}
-                plant={{
-                  id: plant.id,
-                  name: plant.name,
-                  started_at: plant.started_at,
-                  stage: plant.stage,
-                  location: plant.location,
-                  container_type: plant.container_type,
-                  notes: plant.notes,
-                  user_id: plant.user_id,
-                  is_private: plant.is_private,
-                  created_at: plant.created_at,
-                  updated_at: plant.updated_at,
-                  in_soil: plant.in_soil,
-                }}
-              />
+              <div className="flex flex-wrap gap-3">
+                <EditPlantButton action={updatePlant} plant={typedPlant} />
+
+                <CreateChildPlantButton
+                  parentPlantId={typedPlant.id}
+                  parentPlantName={typedPlant.name}
+                  action={createChildPlant}
+                />
+              </div>
+            )}
+
+            {typedPlant.parent_plant_id && parentPlant && (
+              <p className="mt-2 text-sm">
+                Split from{" "}
+                <Link
+                  href={`/plants/${parentPlant.id}`}
+                  className="font-semibold underline"
+                >
+                  {parentPlant.name}
+                </Link>
+              </p>
             )}
           </div>
 
@@ -194,6 +255,13 @@ export default async function PlantDetailPage({
           </div>
 
           <div className="rounded border p-5">
+            <h2 className="text-lg font-semibold">Care Mode</h2>
+            <p className="mt-2">
+              {typedPlant.in_soil ? "🪴 In soil" : "💧 In water"}
+            </p>
+          </div>
+
+          <div className="rounded border p-5">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2">
               {typedPlant.container_type
@@ -207,6 +275,33 @@ export default async function PlantDetailPage({
             <p className="mt-2">{formatDate(typedPlant.created_at)}</p>
           </div>
         </section>
+
+        {typedChildPlants.length > 0 && (
+          <section className="mt-8 rounded border p-5">
+            <h2 className="text-lg font-semibold">Child Plants</h2>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {typedChildPlants.map((child) => (
+                <Link
+                  key={child.id}
+                  href={`/plants/${child.id}`}
+                  className="rounded border bg-white/60 p-3 hover:bg-white"
+                >
+                  <p className="font-semibold">{child.name}</p>
+                  <p className="text-sm">
+                    {child.stage ? toTitleCase(child.stage) : "Stage not set"}
+                  </p>
+                  <p className="text-sm">
+                    {child.in_soil ? "🪴 In soil" : "💧 In water"}
+                  </p>
+                  <p className="text-xs">
+                    {child.is_private ? "🔒 Private" : "🌍 Public"}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section
           className={`mt-8 grid grid-cols-1 gap-4 ${
@@ -267,16 +362,40 @@ export default async function PlantDetailPage({
 
                         <div style={{ color: "#2596be" }}>
                           <div>{formatDate(log.action_date)}</div>
-                          <p>{log.notes ?? "No notes recorded."}</p>
+                          <p>{log.notes ?? ""}</p>
                         </div>
 
-                        {log.care_log_photos && (
-                          <PhotoCarousel
-                            photos={log.care_log_photos}
-                            altBase={`Care log photo for ${typedPlant.name}`}
-                          />
-                        )}
+                        {log.care_log_photos &&
+                          log.care_log_photos.length > 0 && (
+                            <PhotoCarousel
+                              photos={log.care_log_photos}
+                              altBase={`Care log photo for ${typedPlant.name}`}
+                            />
+                          )}
+                        {childPlants && childPlants.length > 0 && (
+                          <section className="mt-8 rounded border p-5">
+                            <h2 className="text-lg font-semibold">
+                              Child Plants
+                            </h2>
 
+                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                              {childPlants.map((child) => (
+                                <Link
+                                  key={child.id}
+                                  href={`/plants/${child.id}`}
+                                  className="rounded border bg-white/60 p-3 hover:bg-white"
+                                >
+                                  <p className="font-semibold">{child.name}</p>
+                                  <p className="text-sm">
+                                    {child.in_soil
+                                      ? "🪴 In soil"
+                                      : "💧 In water"}
+                                  </p>
+                                </Link>
+                              ))}
+                            </div>
+                          </section>
+                        )}
                         {isOwner && (
                           <div className="flex flex-wrap items-center gap-2">
                             <EditCareLogButton
