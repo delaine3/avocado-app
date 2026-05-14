@@ -6,6 +6,8 @@ import { Pencil } from "lucide-react";
 import type { ActionResult } from "../app/actions/plant-actions";
 import CompressedImageInput from "./CompressedImageInput";
 import { CareLog } from "../types/care-log";
+import Spinner from "./Spinner";
+import SubmitButton from "./SubmitButton";
 
 type EditCareLogButtonProps = {
   action: (
@@ -55,7 +57,9 @@ export default function EditCareLogButton({
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6 md:py-10"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            if (!pending) setOpen(false);
+          }}
         >
           <div
             className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded bg-white p-4 shadow-2xl sm:p-6"
@@ -222,17 +226,14 @@ export default function EditCareLogButton({
                   type="button"
                   onClick={() => setOpen(false)}
                   className="cancel-button w-full sm:w-auto"
+                  disabled={pending}
                 >
                   Cancel
                 </button>
-
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="submit-button w-full sm:w-auto"
-                >
-                  {pending ? "Saving..." : "Save Changes"}
-                </button>
+                <SubmitButton
+                  idleText="Save Changes"
+                  pendingText="Saving hanges..."
+                />
               </div>
             </form>
           </div>

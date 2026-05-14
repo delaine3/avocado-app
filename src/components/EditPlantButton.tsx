@@ -7,6 +7,8 @@ import type { ActionResult } from "../app/actions/plant-actions";
 import PlantStageTypeahead from "./PlantStageTypeahead";
 import ContainerTypeahead from "./ContainerTypeahead";
 import { Plant } from "../types/plant";
+import Spinner from "./Spinner";
+import SubmitButton from "./SubmitButton";
 
 type EditPlantButtonProps = {
   action: (
@@ -137,6 +139,7 @@ export default function EditPlantButton({
                   placeholder="Earth is recovering, Future Tree is cracking, Flora is thriving..."
                 />
               </div>
+
               <div>
                 <label className="flex items-center gap-3">
                   <input
@@ -153,6 +156,7 @@ export default function EditPlantButton({
                   changes.
                 </p>
               </div>
+
               <div>
                 <label className="flex items-center gap-3">
                   <input
@@ -175,17 +179,14 @@ export default function EditPlantButton({
                   type="button"
                   onClick={() => setOpen(false)}
                   className="cancel-button w-full sm:w-auto"
+                  disabled={pending}
                 >
                   Cancel
                 </button>
-
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="submit-button w-full sm:w-auto"
-                >
-                  {pending ? "Saving..." : "Save Changes"}
-                </button>
+                <SubmitButton
+                  idleText="Save Changes"
+                  pendingText="Saving Plant..."
+                />
               </div>
             </form>
           </div>

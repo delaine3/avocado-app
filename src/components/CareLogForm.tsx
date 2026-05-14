@@ -6,6 +6,8 @@ import CompressedImageInput from "./CompressedImageInput";
 import { createCareLog } from "../app/actions/plant-actions";
 import ContainerTypeahead from "./ContainerTypeahead";
 import ActionTypeahead from "./ActionTypeahead";
+import Spinner from "./Spinner";
+import SubmitButton from "./SubmitButton";
 
 type CareLogFormProps = {
   plantId: number;
@@ -81,10 +83,7 @@ export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
         <label className="mb-2 block font-medium">Photos</label>
         <CompressedImageInput id="photos" name="photos" multiple />
       </div>
-
-      <button type="submit" disabled={pending} className="submit-button">
-        {pending ? "Saving..." : "Save Care Log"}
-      </button>
+      <SubmitButton idleText="Save" pendingText="Saving..." />
     </form>
   );
 }
