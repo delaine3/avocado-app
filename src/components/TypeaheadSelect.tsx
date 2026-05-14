@@ -26,14 +26,22 @@ export default function TypeaheadSelect({
   required = false,
   onChange,
 }: Props) {
-  const defaultOption = options.find((option) => option.value === defaultValue);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const defaultOption = useMemo(
+    () => options.find((option) => option.value === defaultValue),
+    [options, defaultValue],
+  );
 
   const [query, setQuery] = useState(defaultOption?.label ?? "");
   const [selectedValue, setSelectedValue] = useState(defaultValue ?? "");
   const [open, setOpen] = useState(false);
   const [hasTyped, setHasTyped] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const selectedOption = useMemo(
+    () => options.find((option) => option.value === selectedValue),
+    [options, selectedValue],
+  );
 
   const filteredOptions = useMemo(() => {
     if (!hasTyped) return options;
@@ -46,12 +54,18 @@ export default function TypeaheadSelect({
   }, [options, query, hasTyped]);
 
   useEffect(() => {
+    setQuery(defaultOption?.label ?? "");
+    setSelectedValue(defaultValue ?? "");
+  }, [defaultOption, defaultValue]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!containerRef.current) return;
 
       if (!containerRef.current.contains(event.target as Node)) {
         setOpen(false);
         setHasTyped(false);
+        setQuery(selectedOption?.label ?? "");
       }
     }
 
@@ -60,7 +74,7 @@ export default function TypeaheadSelect({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [selectedOption]);
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -73,6 +87,10 @@ export default function TypeaheadSelect({
           setOpen(true);
           setHasTyped(false);
         }}
+        onClick={() => {
+          setOpen(true);
+          setHasTyped(false);
+        }}
         onChange={(event) => {
           setQuery(event.target.value);
           setSelectedValue("");
@@ -81,18 +99,18 @@ export default function TypeaheadSelect({
           onChange?.("");
         }}
         placeholder={placeholder}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         className="w-full rounded border px-4 py-3 outline-none"
       />
 
-      <input
-        type="hidden"
-        name={name}
-        value={selectedValue}
-        required={required}
-      />
+      <input type="hidden" name={name} value={selectedValue} />
 
       {open && (
-        <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded border bg-white shadow-md">
+        <div
+          role="listbox"
+          className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded border bg-white shadow-md"
+        >
           {filteredOptions.length === 0 ? (
             <p className="px-4 py-3 text-sm text-stone-500">
               No options found.
@@ -102,6 +120,8 @@ export default function TypeaheadSelect({
               <button
                 key={option.value}
                 type="button"
+                role="option"
+                aria-selected={option.value === selectedValue}
                 onClick={() => {
                   setSelectedValue(option.value);
                   setQuery(option.label);
@@ -109,13 +129,23 @@ export default function TypeaheadSelect({
                   setHasTyped(false);
                   onChange?.(option.value);
                 }}
-                className="block w-full px-4 py-3 text-left text-sm hover:bg-stone-100"
+                className={`block w-full px-4 py-3 text-left text-sm hover:bg-stone-100 ${
+                  option.value === selectedValue
+                    ? "bg-stone-100 font-semibold"
+                    : ""
+                }`}
               >
                 {option.label}
               </button>
             ))
           )}
         </div>
+      )}
+
+      {required && !selectedValue && (
+        <p className="mt-1 text-xs text-stone-500">
+          Select an option from the list.
+        </p>
       )}
     </div>
   );
