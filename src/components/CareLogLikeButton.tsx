@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import type { ActionResult } from "../app/actions/plant-actions";
+import Spinner from "./Spinner";
 
 type Props = {
   careLogId: number;
@@ -43,6 +44,7 @@ export default function CareLogLikeButton({
             : "bg-white/70 text-[#5b4636] hover:bg-white"
         }`}
       >
+        {pending && <Spinner />} {pending ? " ..." : ""}
         {likedByCurrentUser ? "♥" : "♡"} {likeCount}
       </button>
     </form>

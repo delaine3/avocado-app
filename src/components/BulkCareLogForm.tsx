@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import type { ActionResult } from "../app/actions/plant-actions";
+import SubmitButton from "./SubmitButton";
 
 type Props = {
   action: (
@@ -165,14 +166,7 @@ export default function BulkCareLogForm({ action }: Props) {
             >
               Cancel
             </button>
-
-            <button
-              type="submit"
-              disabled={pending}
-              className="submit-button w-full sm:w-auto"
-            >
-              {pending ? "Saving..." : "Save Bulk Log"}
-            </button>
+            <SubmitButton idleText="Save" pendingText="Saving..." />
           </div>
         </form>
       </div>
