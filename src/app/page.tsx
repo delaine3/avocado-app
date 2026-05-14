@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Plant } from "../types/plant";
 import { createSupabaseServerClient } from "../lib/supabase-server";
 import { Trash2 } from "lucide-react";
@@ -11,6 +10,7 @@ import LoadingLink from "../components/LoadingLink";
 
 type CareLogForDashboard = {
   plant_id: number;
+  action_type: string;
   action_date: string;
   created_at: string;
   photo_url: string | null;
@@ -18,6 +18,12 @@ type CareLogForDashboard = {
     id: number;
     photo_url: string;
   }[];
+};
+
+type PlantWithCareData = Plant & {
+  last_care_date: string | null;
+  most_recent_action: string | null;
+  recent_photo_url: string | null;
 };
 
 export default async function HomePage() {
@@ -39,6 +45,7 @@ export default async function HomePage() {
         .select(
           `
             plant_id,
+            action_type,
             action_date,
             created_at,
             photo_url,
@@ -49,12 +56,15 @@ export default async function HomePage() {
           `,
         )
         .eq("user_id", user.id)
-        .order("action_date", { ascending: false }),
+        .order("action_date", { ascending: false })
+        .order("created_at", { ascending: false }),
     ]);
 
   const typedCareLogs = (careLogs ?? []) as CareLogForDashboard[];
 
-  const plantsWithCareData = ((plants as Plant[] | null) ?? [])
+  const plantsWithCareData: PlantWithCareData[] = (
+    (plants as Plant[] | null) ?? []
+  )
     .map((plant) => {
       const plantLogs = typedCareLogs.filter(
         (log) => log.plant_id === plant.id,
@@ -76,21 +86,29 @@ export default async function HomePage() {
       return {
         ...plant,
         last_care_date: mostRecentCareLog?.action_date ?? null,
+        most_recent_action: mostRecentCareLog?.action_type ?? null,
         recent_photo_url: recentPhotoUrl,
       };
     })
     .sort((a, b) => {
-      if (!a.last_care_date) return -1;
-      if (!b.last_care_date) return 1;
+      if (!a.last_care_date && !b.last_care_date) {
+        return a.name.localeCompare(b.name);
+      }
 
-      return (
-        new Date(a.last_care_date).getTime() -
-        new Date(b.last_care_date).getTime()
-      );
+      if (!a.last_care_date) return 1;
+      if (!b.last_care_date) return -1;
+
+      const dateDifference =
+        new Date(b.last_care_date).getTime() -
+        new Date(a.last_care_date).getTime();
+
+      if (dateDifference !== 0) return dateDifference;
+
+      return a.name.localeCompare(b.name);
     });
 
   return (
-    <main className="min-h-screen p-8 page">
+    <main className="min-h-screen p-4 sm:p-8 page">
       <div className="mx-auto max-w-5xl">
         <div
           className="flex items-start justify-between gap-3 rounded border border-white/30 p-4 shadow-sm"
@@ -122,11 +140,11 @@ export default async function HomePage() {
           </div>
         )}
 
-        <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-10 grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plantsWithCareData.map((plant) => (
             <div
               key={plant.id}
-              className="flex h-full flex-col rounded border bg-white p-5 shadow-sm transition hover:shadow-md"
+              className="flex h-full min-h-[28rem] flex-col rounded border bg-white p-5 shadow-sm transition hover:shadow-md"
               style={{
                 background:
                   "linear-gradient(147deg, #9d772d, #8d6b29, #a78542,#b19257,#9d772d,#5e471b)",
@@ -134,7 +152,8 @@ export default async function HomePage() {
             >
               <LoadingLink
                 href={`/plants/${plant.id}`}
-                className="block flex-1"
+                className="block flex-1 text-white"
+                contentClassName="block h-full"
               >
                 {plant.recent_photo_url && (
                   <img
@@ -148,20 +167,33 @@ export default async function HomePage() {
 
                 <p className="mt-2">Stage: {toTitleCase(plant.stage)}</p>
 
-                <span
-                  className={`inline-block rounded px-2 py-1 text-xs ${
-                    plant.is_private
-                      ? "bg-red-200 text-red-800"
-                      : "bg-green-200 text-green-800"
-                  }`}
-                >
-                  {plant.is_private ? "🔒 Private" : "🌍 Public"}
-                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span
+                    className={`inline-block rounded px-2 py-1 text-xs ${
+                      plant.is_private
+                        ? "bg-red-200 text-red-800"
+                        : "bg-green-200 text-green-800"
+                    }`}
+                  >
+                    {plant.is_private ? "🔒 Private" : "🌍 Public"}
+                  </span>
 
-                <p>
+                  <span className="inline-block rounded bg-white/70 px-2 py-1 text-xs text-[#4a2c14]">
+                    {plant.in_soil ? "🪴 In soil" : "💧 In water"}
+                  </span>
+                </div>
+
+                <p className="mt-3">
                   Last cared:{" "}
                   {plant.last_care_date
                     ? formatDate(plant.last_care_date)
+                    : "No care logs yet"}
+                </p>
+
+                <p>
+                  Last care type:{" "}
+                  {plant.most_recent_action
+                    ? toTitleCase(plant.most_recent_action)
                     : "No care logs yet"}
                 </p>
 
@@ -207,24 +239,7 @@ export default async function HomePage() {
                   <Trash2 size={16} />
                 </ActionFormButton>
 
-                <EditPlantButton
-                  action={updatePlant}
-                  plant={{
-                    id: plant.id,
-                    name: plant.name,
-                    started_at: plant.started_at,
-                    stage: plant.stage,
-                    location: plant.location,
-                    container_type: plant.container_type,
-                    notes: plant.notes,
-                    user_id: plant.user_id,
-                    is_private: plant.is_private,
-                    created_at: plant.created_at,
-                    updated_at: plant.updated_at,
-                    in_soil: plant.in_soil,
-                    parent_plant_id: plant.parent_plant_id,
-                  }}
-                />
+                <EditPlantButton action={updatePlant} plant={plant} />
               </div>
             </div>
           ))}

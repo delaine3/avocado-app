@@ -169,18 +169,6 @@ export default async function PlantDetailPage({
           {toTitleCase(owner)}&apos;s plant {typedPlant.name}
         </h1>
 
-        {typedParentPlant && (
-          <p className="mt-2 text-sm">
-            Split from{" "}
-            <LoadingLink
-              href={`/plants/${typedParentPlant.id}`}
-              className="font-semibold underline"
-            >
-              {typedParentPlant.name}
-            </LoadingLink>
-          </p>
-        )}
-
         <p>{typedPlant.notes ?? ""}</p>
       </div>
 
