@@ -44,18 +44,20 @@ export default async function HomePage() {
         .from("care_logs")
         .select(
           `
-            plant_id,
-            action_date,
-            created_at,
-            photo_url,
-            care_log_photos (
-              id,
-              photo_url
-            )
-          `,
+          plant_id,
+          action_type,
+          action_date,
+          created_at,
+          photo_url,
+          care_log_photos (
+            id,
+            photo_url
+          )
+        `,
         )
         .eq("user_id", user.id)
-        .order("action_date", { ascending: true }),
+        .order("action_date", { ascending: false })
+        .order("created_at", { ascending: false }),
     ]);
 
   const typedCareLogs = (careLogs ?? []) as CareLogForDashboard[];
@@ -64,9 +66,19 @@ export default async function HomePage() {
     (plants as Plant[] | null) ?? []
   )
     .map((plant) => {
-      const plantLogs = typedCareLogs.filter(
-        (log) => log.plant_id === plant.id,
-      );
+      const plantLogs = typedCareLogs
+        .filter((log) => log.plant_id === plant.id)
+        .sort((a, b) => {
+          const actionDateDifference =
+            new Date(b.action_date).getTime() -
+            new Date(a.action_date).getTime();
+
+          if (actionDateDifference !== 0) return actionDateDifference;
+
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        });
 
       const mostRecentCareLog = plantLogs[0];
 
