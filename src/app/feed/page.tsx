@@ -10,6 +10,7 @@ import {
 import CareLogLikeButton from "@/src/components/CareLogLikeButton";
 import { MessageCircle } from "lucide-react";
 import PhotoCarousel from "@/src/components/PhotoCarousel";
+import LoadingLink from "@/src/components/LoadingLink";
 
 type FeedCareLog = {
   id: number;
@@ -191,12 +192,12 @@ export default async function FeedPage() {
                           @{username} {formatDateTime(log.created_at)}
                         </p>
 
-                        <Link
+                        <LoadingLink
                           href={`/plants/${log.plant_id}`}
                           className="text-xl font-bold text-[#4a2c14] hover:underline"
                         >
                           {log.plants.name}
-                        </Link>
+                        </LoadingLink>
 
                         <p className="mt-1 text-sm text-[#5b4636]">
                           Care Date {formatDate(log.action_date)}

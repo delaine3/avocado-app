@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Plant } from "../../../types/plant";
 import type { CareLog } from "../../../types/care-log";
@@ -18,6 +17,7 @@ import { createSupabaseServerClient } from "../../../lib/supabase-server";
 import { getLogTypeMeta } from "@/src/lib/getLogTypeMeta";
 import PhotoCarousel from "@/src/components/PhotoCarousel";
 import CreateChildPlantButton from "@/src/components/CreateChildPlantButton";
+import LoadingLink from "@/src/components/LoadingLink";
 import { createChildPlant } from "../new/actions";
 
 interface PlantDetailPageProps {
@@ -170,14 +170,14 @@ export default async function PlantDetailPage({
         </h1>
 
         {typedParentPlant && (
-          <p className="mt-2 text-3xl">
-            Split from{"  "}
-            <Link
+          <p className="mt-2 text-sm">
+            Split from{" "}
+            <LoadingLink
               href={`/plants/${typedParentPlant.id}`}
               className="font-semibold underline"
             >
               {typedParentPlant.name}
-            </Link>
+            </LoadingLink>
           </p>
         )}
 
@@ -202,18 +202,6 @@ export default async function PlantDetailPage({
                   action={createChildPlant}
                 />
               </div>
-            )}
-
-            {typedPlant.parent_plant_id && parentPlant && (
-              <p className="mt-2 text-sm">
-                Split from{" "}
-                <Link
-                  href={`/plants/${parentPlant.id}`}
-                  className="font-semibold underline"
-                >
-                  {parentPlant.name}
-                </Link>
-              </p>
             )}
           </div>
 
@@ -282,22 +270,25 @@ export default async function PlantDetailPage({
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {typedChildPlants.map((child) => (
-                <Link
+                <LoadingLink
                   key={child.id}
                   href={`/plants/${child.id}`}
                   className="rounded border bg-white/60 p-3 hover:bg-white"
                 >
                   <p className="font-semibold">{child.name}</p>
+
                   <p className="text-sm">
                     {child.stage ? toTitleCase(child.stage) : "Stage not set"}
                   </p>
+
                   <p className="text-sm">
                     {child.in_soil ? "🪴 In soil" : "💧 In water"}
                   </p>
+
                   <p className="text-xs">
                     {child.is_private ? "🔒 Private" : "🌍 Public"}
                   </p>
-                </Link>
+                </LoadingLink>
               ))}
             </div>
           </section>
@@ -311,6 +302,7 @@ export default async function PlantDetailPage({
           {isOwner && (
             <div className="rounded border p-5">
               <h2 className="text-lg font-semibold">Add Care Log</h2>
+
               <CareLogForm
                 plantId={typedPlant.id}
                 plantStage={typedPlant.stage}
@@ -372,30 +364,7 @@ export default async function PlantDetailPage({
                               altBase={`Care log photo for ${typedPlant.name}`}
                             />
                           )}
-                        {childPlants && childPlants.length > 0 && (
-                          <section className="mt-8 rounded border p-5">
-                            <h2 className="text-lg font-semibold">
-                              Child Plants
-                            </h2>
 
-                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                              {childPlants.map((child) => (
-                                <Link
-                                  key={child.id}
-                                  href={`/plants/${child.id}`}
-                                  className="rounded border bg-white/60 p-3 hover:bg-white"
-                                >
-                                  <p className="font-semibold">{child.name}</p>
-                                  <p className="text-sm">
-                                    {child.in_soil
-                                      ? "🪴 In soil"
-                                      : "💧 In water"}
-                                  </p>
-                                </Link>
-                              ))}
-                            </div>
-                          </section>
-                        )}
                         {isOwner && (
                           <div className="flex flex-wrap items-center gap-2">
                             <EditCareLogButton

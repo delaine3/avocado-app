@@ -7,6 +7,7 @@ import PlantStageTypeahead from "@/src/components/PlantStageTypeahead";
 import ContainerTypeahead from "@/src/components/ContainerTypeahead";
 import SubmitButton from "@/src/components/SubmitButton";
 import { createPlant } from "@/src/app/plants/new/actions";
+import LoadingLink from "./LoadingLink";
 
 export default function NewPlantForm() {
   const [state, formAction] = useActionState(createPlant, null);
@@ -102,9 +103,9 @@ export default function NewPlantForm() {
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
         <SubmitButton idleText="Save Plant" pendingText="Saving Plant..." />
 
-        <Link href="/" className="cancel-button text-center">
+        <LoadingLink href="/" className="cancel-button text-center">
           Cancel
-        </Link>
+        </LoadingLink>
       </div>
     </form>
   );
