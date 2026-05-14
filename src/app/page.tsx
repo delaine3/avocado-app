@@ -45,7 +45,6 @@ export default async function HomePage() {
         .select(
           `
             plant_id,
-            action_type,
             action_date,
             created_at,
             photo_url,
@@ -56,8 +55,7 @@ export default async function HomePage() {
           `,
         )
         .eq("user_id", user.id)
-        .order("action_date", { ascending: false })
-        .order("created_at", { ascending: false }),
+        .order("action_date", { ascending: true }),
     ]);
 
   const typedCareLogs = (careLogs ?? []) as CareLogForDashboard[];
