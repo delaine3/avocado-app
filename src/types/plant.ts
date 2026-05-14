@@ -22,4 +22,5 @@ export interface Plant {
   label?: string;
   is_private: boolean;
   in_soil: boolean;
+  parent_plant_id: number | null;
 }
