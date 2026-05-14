@@ -7,6 +7,7 @@ import { deletePlant, updatePlant } from "./actions/plant-actions";
 import EditPlantButton from "../components/EditPlantButton";
 import { formatDate, toTitleCase } from "./utilities/format";
 import { redirect } from "next/navigation";
+import LoadingLink from "../components/LoadingLink";
 
 type CareLogForDashboard = {
   plant_id: number;
@@ -131,10 +132,9 @@ export default async function HomePage() {
                   "linear-gradient(147deg, #9d772d, #8d6b29, #a78542,#b19257,#9d772d,#5e471b)",
               }}
             >
-              <Link
+              <LoadingLink
                 href={`/plants/${plant.id}`}
                 className="block flex-1"
-                style={{ color: "#ffffff" }}
               >
                 {plant.recent_photo_url && (
                   <img
@@ -177,7 +177,7 @@ export default async function HomePage() {
                 {plant.notes && (
                   <p className="mt-3 max-h-20 overflow-hidden">{plant.notes}</p>
                 )}
-              </Link>
+              </LoadingLink>
 
               <div className="mt-auto flex flex-wrap items-center gap-4 pt-4">
                 <ActionFormButton

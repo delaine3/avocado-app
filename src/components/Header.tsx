@@ -7,6 +7,7 @@ import { supabase } from "@/src/lib/supabase";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
 import ProfileDropdown from "@/src/components/ProfileDropdown";
+import LoadingLink from "./LoadingLink";
 
 type UserProfile = {
   id: string;
@@ -74,29 +75,29 @@ export default function Header() {
       style={{ background: "#455411" }}
     >
       <div className="mx-auto flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-2 text-white">
+        <LoadingLink href="/" className="flex items-center gap-2 text-white">
           <span className="text-2xl">🥑</span>
           <span className="text-xl font-extrabold">AvoLog</span>
-        </Link>
+        </LoadingLink>
 
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 sm:flex">
             <div className="pl-2">
-              <Link
+              <LoadingLink
                 className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
                 href="/"
               >
                 Dashboard
-              </Link>
+              </LoadingLink>
             </div>
 
             <div className="border-l-2 border-white pl-2">
-              <Link
+              <LoadingLink
                 className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
                 href="/feed"
               >
                 Feed
-              </Link>
+              </LoadingLink>
             </div>
 
             {userEmail && (
@@ -106,12 +107,12 @@ export default function Header() {
                 </div>
 
                 <div className="border-l-2 border-white pl-2">
-                  <Link
+                  <LoadingLink
                     href="/plants/new"
                     className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
                   >
                     Add Plant
-                  </Link>
+                  </LoadingLink>
                 </div>
               </>
             )}
@@ -128,16 +129,16 @@ export default function Header() {
             />
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/login" className="text-sm text-white">
+              <LoadingLink href="/login" className="text-sm text-white">
                 Login
-              </Link>
+              </LoadingLink>
 
-              <Link
+              <LoadingLink
                 href="/signup"
                 className="rounded bg-white px-3 py-2 text-sm font-semibold text-[#455411]"
               >
                 Sign up
-              </Link>
+              </LoadingLink>
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LayoutDashboard, LogOut, Newspaper, Plus } from "lucide-react";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
+import LoadingLink from "./LoadingLink";
 
 type Props = {
   displayName: string | null;
@@ -75,32 +76,32 @@ export default function ProfileDropdown({
 
           {showMobileLinks && (
             <div className="border-b border-[#4a2c14]/20 py-2 sm:hidden">
-              <Link
+              <LoadingLink
                 href="/"
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
               >
                 <LayoutDashboard size={16} />
                 Dashboard
-              </Link>
+              </LoadingLink>
 
-              <Link
+              <LoadingLink
                 href="/feed"
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
               >
                 <Newspaper size={16} />
                 Feed
-              </Link>
+              </LoadingLink>
 
-              <Link
+              <LoadingLink
                 href="/plants/new"
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center gap-2 rounded px-3 py-3 text-sm hover:bg-[#bed582]/40"
               >
                 <Plus size={16} />
                 Add Plant
-              </Link>
+              </LoadingLink>
 
               <div className="px-3 py-2">
                 <BulkCareLogForm action={createCareLogForAllPlants} />
