@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { LayoutDashboard, LogOut, Newspaper, Plus } from "lucide-react";
+import { LayoutDashboard, LogOut, Newspaper, Plus, Tally5 } from "lucide-react";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
 import LoadingLink from "./LoadingLink";
@@ -72,6 +71,32 @@ export default function ProfileDropdown({
           <div className="border-b border-[#4a2c14]/20 px-3 py-2 text-sm">
             <p className="truncate font-semibold">{displayName}</p>
             <p className="truncate text-xs opacity-60">{userEmail}</p>
+            <div className="">
+              <LoadingLink
+                className="flex items-center gap-3 rounded px-3 py-2 hover:bg-white/20"
+                href="/privacy"
+              >
+                Privacy
+              </LoadingLink>
+              <LoadingLink
+                className="flex items-center gap-3 rounded px-3 py-2 hover:bg-stone/200"
+                href="/terms"
+              >
+                Terms
+              </LoadingLink>
+              <LoadingLink
+                className="flex items-center gap-3 rounded px-3 py-2 hover:bg-white/20"
+                href="/disclaimer"
+              >
+                Disclaimer
+              </LoadingLink>
+              <LoadingLink
+                className="flex items-center gap-3 rounded px-3 py-2 hover:bg-white/20"
+                href="/community-guidelines"
+              >
+                Guidelines
+              </LoadingLink>
+            </div>
           </div>
 
           {showMobileLinks && (
@@ -103,7 +128,8 @@ export default function ProfileDropdown({
                 Add Plant
               </LoadingLink>
 
-              <div className="px-3 py-2">
+              <div className="flex w-full items-center rounded px-3 text-sm hover:bg-[#bed582]/40">
+                <Tally5 size={16} />
                 <BulkCareLogForm action={createCareLogForAllPlants} />
               </div>
             </div>

@@ -177,7 +177,7 @@ export default function BulkCareLogForm({ action }: Props) {
     <>
       <button
         type="button"
-        className="flex items-center gap-3 rounded px-3 py-2 text-white hover:bg-white/20"
+        className="flex items-center gap-3 rounded px-2 py-2 hover:bg-white/20"
         onClick={() => setOpen(true)}
       >
         Bulk Log
