@@ -72,7 +72,7 @@ export default function PrivacyPage() {
         <h2 className="mt-8 text-xl font-semibold">Contact</h2>
         <p className="mt-2">
           For privacy questions or deletion requests, contact the app operator
-          at the support email provided in the app.
+          at delaineabner888@gmail.com
         </p>
       </div>
     </main>
