@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { supabase } from "@/src/lib/supabase";
 import BulkCareLogForm from "./BulkCareLogForm";
 import { createCareLogForAllPlants } from "../app/actions/plant-actions";
@@ -117,7 +116,6 @@ export default function Header() {
               </>
             )}
           </div>
-
           {userEmail ? (
             <ProfileDropdown
               displayName={displayName}
@@ -140,7 +138,7 @@ export default function Header() {
                 Sign up
               </LoadingLink>
             </div>
-          )}
+          )}{" "}
         </div>
       </div>
     </header>
