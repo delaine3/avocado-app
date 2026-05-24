@@ -3,20 +3,31 @@
 import { useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 import { useRouter } from "next/navigation";
+import Spinner from "@/src/components/Spinner";
+
+const demoCredentials = {
+  email: "demo@avolog.com",
+  password: "D3m0Pa$$w0rd783!",
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [pending, setPending] = useState(false);
+  const [demoPending, setDemoPending] = useState(false);
+
   const router = useRouter();
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function loginWithCredentials(
+    loginEmail: string,
+    loginPassword: string,
+  ) {
     setMessage("Logging in...");
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: loginEmail,
+      password: loginPassword,
     });
 
     if (error) {
@@ -36,24 +47,53 @@ export default function LoginPage() {
     router.push("/");
   }
 
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      setPending(true);
+      await loginWithCredentials(email, password);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleDemoLogin() {
+    try {
+      setDemoPending(true);
+      setEmail(demoCredentials.email);
+      setPassword(demoCredentials.password);
+
+      await loginWithCredentials(
+        demoCredentials.email,
+        demoCredentials.password,
+      );
+    } finally {
+      setDemoPending(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen flex items-center justify-center page px-4">
-      <div className=" items-center justify-center">
-        <div className="text-xl mb-4">
-          For Demo Version Use Crenedtials:{" "}
-          <p>
-            Email: <span className="font-bold">demo@avolog.com</span>
-          </p>
-          <p>
-            Password: <span className="font-bold">D3m0Pa$$w0rd783!</span>
-          </p>
-        </div>
-        <form onSubmit={handleLogin} className="w-full max-w-md space-y-4">
+    <main className="flex min-h-screen items-center justify-center px-4 page">
+      <div className="w-full max-w-md">
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={pending || demoPending}
+          className="submit-button mb-4 w-full"
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            {demoPending && <Spinner />}
+            {demoPending ? "Opening Demo..." : "Login to Demo Account"}
+          </span>
+        </button>
+
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             className="w-full rounded border px-4 py-3"
             required
           />
@@ -62,16 +102,23 @@ export default function LoginPage() {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             className="w-full rounded border px-4 py-3"
             required
           />
 
-          <button type="submit" className="submit-button">
-            Login
+          <button
+            type="submit"
+            disabled={pending || demoPending}
+            className="submit-button w-full"
+          >
+            <span className="inline-flex items-center justify-center gap-2">
+              {pending && <Spinner />}
+              {pending ? "Logging in..." : "Login"}
+            </span>
           </button>
 
-          {message && <p>{message}</p>}
+          {message && <p className="text-sm">{message}</p>}
         </form>
       </div>
     </main>
