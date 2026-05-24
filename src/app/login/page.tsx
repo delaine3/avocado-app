@@ -38,33 +38,42 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center page px-4">
-      <form onSubmit={handleLogin} className="w-full max-w-md space-y-4">
-        <h1 className="title-sm">Login</h1>
+      <div className=" items-center justify-center">
+        <div className="text-xl mb-4">
+          For Demo Version Use Crenedtials:{" "}
+          <p>
+            Email: <span className="font-bold">demo@avolog.com</span>
+          </p>
+          <p>
+            Password: <span className="font-bold">D3m0Pa$$w0rd783!</span>
+          </p>
+        </div>
+        <form onSubmit={handleLogin} className="w-full max-w-md space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded border px-4 py-3"
+            required
+          />
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border px-4 py-3"
-          required
-        />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded border px-4 py-3"
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border px-4 py-3"
-          required
-        />
+          <button type="submit" className="submit-button">
+            Login
+          </button>
 
-        <button type="submit" className="submit-button">
-          Login
-        </button>
-
-        {message && <p>{message}</p>}
-      </form>
+          {message && <p>{message}</p>}
+        </form>
+      </div>
     </main>
   );
 }
