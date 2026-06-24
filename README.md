@@ -1,12 +1,14 @@
 # AvoLog
 
-AvoLog is a full-stack plant care journal built for tracking avocado propagation, growth, repotting, water changes, photos, and public care updates.
+AvoLog is a full-stack plant care journal for tracking avocado propagation, growth, repotting, water changes, photos, and public care updates.
 
-It started as a personal avocado tracker, then grew into a multi-user app with authentication, privacy controls, a public feed, comments, likes, photo galleries, bulk care logging, and plant lineage tracking for split seeds.
+It started as my personal avocado tracker, then became a real multi-user app with authentication, privacy controls, a public feed, comments, likes, photo galleries, bulk care logging, and plant lineage tracking for split seeds.
 
-The app is designed around a real care workflow: some plants are still in water, some have moved into soil, some are parent records for split seeds, and not every care log belongs on a public feed.
+The app follows the actual care workflow. Some plants are in water. Some have moved into soil. Some are parent records for split seeds. Some updates belong on the public feed. Some stay private.
 
-## Live Demo https://avocado-app-mu.vercel.app/
+## Live Demo
+
+https://avocado-app-mu.vercel.app/
 
 Demo account:
 
@@ -19,56 +21,49 @@ Password: D3m0Pa$$w0rd783!
 
 ### Frontend
 
-- Next.js App Router
-- TypeScript
-- React Server Components
-- Client Components where interactivity is required
-- Tailwind CSS
-- Lucide React icons
+* Next.js App Router
+* TypeScript
+* React Server Components
+* Client Components
+* Tailwind CSS
+* Lucide React icons
 
 ### Backend and Data
 
-- Supabase Postgres
-- Supabase Auth
-- Supabase Storage
-- Row Level Security policies
-- Server Actions for mutations
-- Vercel deployment
+* Supabase Postgres
+* Supabase Auth
+* Supabase Storage
+* Row Level Security policies
+* Server Actions
+* Vercel deployment
 
 ## Core Features
 
 ### Plant Tracking
 
-Users can create plant profiles with:
+Users can create plant profiles with a name, start date, stage, location, container type, notes, privacy setting, and care mode.
 
-- name
-- start date
-- stage
-- location
-- container type
-- soil / water care mode
-- notes
-- public or private visibility
+The `in_soil` field defines the plant’s care workflow. Container type describes the physical setup. `in_soil` tells the app whether the plant needs watering or a water change.
 
-The `in_soil` flag is one of the more important fields in the app. Container type describes the physical setup, but `in_soil` controls the care workflow. A plant can be in a tall jar, a water glass, a pot, or outside. The app needs to know whether it should receive a water change or watering.
+A plant can move between jars, glasses, pots, and outdoor spaces while keeping the correct care behavior attached to its growing medium.
 
 ### Care Logs
 
-Each plant can have many care logs. A care log can include:
+Each plant can have many care logs. Logs can include:
 
-- action type
-- care date
-- notes
-- privacy setting
-- one or more photos
+* action type
+* care date
+* notes
+* privacy setting
+* one or more photos
 
-Care actions are context-aware. Water-propagation plants get options like water changes and root growth. Soil plants get options like watering, fertilizing, pruning, pest checks, and mulching.
+Care actions change based on the plant’s care mode. Water-propagation plants get options like water changes and root growth. Soil plants get options like watering, fertilizing, pruning, pest checks, and mulching.
 
 ### Multiple Photos Per Care Log
 
-A care log can have a photo gallery. Photos are stored in a separate `care_log_photos` table instead of being squeezed into repeated columns on `care_logs`.
+Care logs can have photo galleries.
 
-This gives the app a clean one-to-many relationship:
+Photos live in a separate `care_log_photos` table, which gives the app a clean one-to-many relationship:
 
 ```txt
 plants
@@ -76,43 +71,47 @@ plants
       -> care_log_photos
 ```
 
-The original `care_logs.photo_url` field is kept as a fallback preview image for dashboard cards and older records.
+The older `care_logs.photo_url` field stays as a fallback preview image for dashboard cards and older records.
 
 ### Public Feed
 
-Public care logs from public plants appear in the feed. The feed supports:
+Public care logs from public plants appear in the feed.
 
-- plant owner display
-- care action badge
-- notes
-- photo carousel
-- likes
-- comments
+The feed supports:
 
-Privacy is handled at both plant and care log level:
+* plant owner display
+* care action badges
+* notes
+* photo carousels
+* likes
+* comments
 
-- A private plant hides all of its logs from the feed.
-- A private care log hides only that specific log.
-- Public plant + public log means the log can appear in the feed.
+Privacy works at both plant and care log level:
+
+```txt
+private plant = all logs from that plant stay off the feed
+private care log = that specific log stays hidden
+public plant + public log = the log can appear in the feed
+```
 
 ### Likes and Comments
 
-The social layer is intentionally lightweight. Users can like care logs and comment on public care updates.
+The social layer is intentionally lightweight. Users can like and comment on public care updates.
 
-The related tables are separate from the main log table:
+Interactions are stored separately from the main care log table:
 
 ```txt
 care_log_likes
 care_log_comments
 ```
 
-This keeps interaction data from polluting the core plant care records.
+That keeps the plant care records organized.
 
 ### Plant Lineage
 
-AvoLog supports parent-child plant relationships through `parent_plant_id`.
+AvoLog supports parent-child plant relationships with `parent_plant_id`.
 
-This was added for split seeds, such as a single avocado seed that separated into two viable halves. The original plant can remain as the origin record, while each half becomes its own active plant with its own logs and photos.
+This was added because avocado seeds can split into two viable halves. The original seed can remain as the origin record, while each half becomes its own active plant with its own care history.
 
 Example:
 
@@ -122,50 +121,46 @@ Gemini
   -> Nia
 ```
 
-This keeps the biological origin intact without forcing two living plants into one record.
+That keeps the biological origin intact while giving each living plant its own record.
 
 ### Bulk Care Logging
 
 Users can create care logs for multiple plants at once.
 
-Bulk logging supports care groups:
+Bulk logging supports:
 
-- all plants
-- soil plants only
-- water plants only
+* all plants
+* soil plants only
+* water plants only
 
-The action dropdown changes based on the group. For example, water plants should not receive a “watered” action because their correct care workflow is usually “water change.”
+The action dropdown changes based on the selected group. Soil plants get soil-care actions. Water plants get water-propagation actions.
 
 ## Architecture
 
 AvoLog uses the Next.js App Router with a mix of Server Components and Client Components.
 
-Server Components are used for data-heavy pages such as:
+Server Components handle data-heavy pages like:
 
-- dashboard
-- plant detail pages
-- feed
-- legal pages
+* dashboard
+* plant detail pages
+* feed
+* legal pages
 
-Client Components are used for UI that needs browser state:
+Client Components handle browser-side interaction like:
 
-- modals
-- typeahead selects
-- form submission feedback
-- dropdown menus
-- photo carousels
-- loading links
-- compressed image inputs
+* modals
+* typeahead selects
+* form feedback
+* dropdown menus
+* photo carousels
+* loading links
+* compressed image inputs
 
-This split keeps most data fetching close to the server while still allowing rich UI behavior where it matters.
-
-## Data Model Overview
+## Data Model
 
 ### `profiles`
 
 Stores public account metadata.
-
-Typical fields:
 
 ```txt
 id
@@ -174,13 +169,11 @@ username
 avatar_url
 ```
 
-The `profiles.id` maps to the Supabase Auth user id.
+`profiles.id` maps to the Supabase Auth user id.
 
 ### `plants`
 
 Stores each plant profile.
-
-Important fields:
 
 ```txt
 id
@@ -198,19 +191,17 @@ created_at
 updated_at
 ```
 
-Design notes:
+Key fields:
 
-- `user_id` controls ownership.
-- `is_private` controls visibility.
-- `in_soil` controls care behavior.
-- `parent_plant_id` supports plant lineage.
-- `container_type` stays descriptive instead of driving workflow rules by itself.
+* `user_id` controls ownership
+* `is_private` controls visibility
+* `in_soil` controls care behavior
+* `parent_plant_id` supports plant lineage
+* `container_type` describes the plant’s physical setup
 
 ### `care_logs`
 
-Stores care events for plants.
-
-Important fields:
+Stores care events.
 
 ```txt
 id
@@ -224,16 +215,13 @@ is_private
 created_at
 ```
 
-Design notes:
+`action_date` is the date the user says the care happened. `created_at` is when the record was created in the database.
 
-- `action_date` is the date the user says the care happened.
-- `created_at` is the actual database creation timestamp.
-- The dashboard can sort by care date, then use `created_at` as a tie-breaker.
-- `photo_url` is a legacy / preview fallback. The full gallery lives in `care_log_photos`.
+The dashboard can sort by care date, then use `created_at` as a tie-breaker.
 
 ### `care_log_photos`
 
-Stores galleries for care logs.
+Stores care log galleries.
 
 ```txt
 id
@@ -244,7 +232,7 @@ storage_path
 created_at
 ```
 
-This lets one care log have many photos without changing the care log schema every time photo handling grows.
+This lets one care log have many photos while keeping the care log schema clean.
 
 ### `care_log_likes`
 
@@ -257,7 +245,7 @@ user_id
 created_at
 ```
 
-A uniqueness rule prevents duplicate likes by the same user on the same log.
+A uniqueness rule prevents the same user from liking the same log twice.
 
 ### `care_log_comments`
 
@@ -277,99 +265,81 @@ Comments join back to profiles so the feed can show usernames and avatars.
 
 ### Server Actions for Mutations
 
-Create, update, delete, like, comment, and bulk log operations are handled through Server Actions.
+Create, update, delete, like, comment, and bulk log operations use Server Actions.
 
-This keeps mutation logic close to the server and avoids exposing database write logic in browser-side components. Client components call actions through forms, then show loading states and toast messages.
+This keeps mutation logic close to the server. Client components call actions through forms, then show loading states and toast messages.
 
-### Typeahead Selects Instead of Plain Selects
+### Typeahead Selects
 
-AvoLog uses reusable typeahead components for values like:
+AvoLog uses reusable typeahead components for plant stage, container type, and action type.
 
-- plant stage
-- container type
-- action type
+The typeahead always opens with the full option list. Typing filters the list. This matches the way people tend to use selects: click first, browse options, then narrow down when needed.
 
-The typeahead always shows the full option list when opened, even if a value is already selected. Typing filters the options. This is intentional because many users click a select expecting to see all valid values first.
+### `in_soil` as a Care Flag
 
-### `in_soil` as an Operational Flag
+`in_soil` defines the care workflow directly.
 
-The app does not infer watering behavior only from container type. A plant may move from one jar to another, and that should not mark it as a soil plant.
-
-The `in_soil` flag answers the operational question:
-
-```txt
-Should this plant be watered, or should its water be changed?
-```
-
-That separates physical description from care workflow.
+A plant can move between containers while keeping the correct care behavior attached to its growing medium. The field defines whether the plant needs a water change or watering.
 
 ### Separate Photo Table
 
-A single `photo_url` field worked for the first version, but it broke down once care logs needed multiple photos.
+The first version used a single `photo_url`. Care logs later grew into galleries.
 
 Moving photos into `care_log_photos` gives the app:
 
-- multiple photos per log
-- gallery support
-- better long-term schema
-- easier migration from old single-photo records
+* multiple photos per log
+* gallery support
+* cleaner schema
+* easier migration from old single-photo records
 
-### Parent Plant Relationships
+### Feed Privacy Rules
 
-Split seeds and propagated plants need lineage. AvoLog uses `parent_plant_id` rather than duplicating notes or inventing a separate grouping system.
-
-This allows one plant to become the origin for multiple active plants while keeping each child plant independently trackable.
-
-### Public Feed Privacy Rules
-
-The feed only shows care logs where:
+The feed shows logs where:
 
 ```txt
 plant.is_private = false
 care_log.is_private = false
 ```
 
-That means users can hide an entire plant or hide a single care log.
-
-This was a deliberate product decision because not every plant update needs the same audience.
+Users can hide an entire plant or one specific log.
 
 ## Access Control and Privacy
 
-The app uses Supabase Auth and ownership checks so users can manage their own plants, logs, comments, and photos.
+AvoLog uses Supabase Auth and ownership checks so users can manage their own plants, logs, comments, and photos.
 
-Privacy controls exist at two levels:
+Privacy exists at two levels:
 
-- plant-level privacy
-- care-log-level privacy
+* plant privacy
+* care log privacy
 
-There are also legal and safety pages:
+The app also includes:
 
-- Privacy Policy
-- Terms of Use
-- Disclaimer
-- Community Guidelines
+* Privacy Policy
+* Terms of Use
+* Disclaimer
+* Community Guidelines
 
-These are included because the app stores user-generated content, photos, comments, usernames, timestamps, and potentially personal information inside notes or images.
+These pages are included because the app stores user-generated content, photos, comments, usernames, timestamps, and notes that may contain personal information.
 
 ## Image Handling
 
-Image uploads use client-side compression before submission. This reduces payload size and keeps uploads more manageable.
+Image uploads use client-side compression before submission. This keeps uploads more manageable.
 
 Care log photos are stored in Supabase Storage, with database records stored in `care_log_photos`.
 
-The app displays images through a reusable photo carousel, so long feeds and plant histories do not become huge vertical stacks of images.
+Images are displayed through a reusable photo carousel, so feeds and plant histories stay browsable.
 
 ## Loading and Form Feedback
 
 Reusable loading components are used across the app:
 
-- `Spinner`
-- `SubmitButton`
-- `LoadingLink`
+* `Spinner`
+* `SubmitButton`
+* `LoadingLink`
 
-Forms use pending states through `useActionState` or `useFormStatus`. Links use a client wrapper that shows a spinner during route navigation.
+Forms use pending states through `useActionState` or `useFormStatus`.
 
-Validation errors return structured action results instead of throwing whenever possible. This prevents normal user mistakes, such as missing a field, from becoming full error pages.
+Validation errors return structured action results whenever possible. Missing fields show useful feedback and let the user continue.
 
 ## Folder Structure
 
@@ -470,37 +440,37 @@ care_log_likes
 care_log_comments
 ```
 
-It also needs Supabase Auth enabled and appropriate RLS policies for:
+It also needs Supabase Auth and RLS policies for:
 
-- users managing their own plants
-- users managing their own care logs
-- public feed reads for public plants and public logs
-- photo reads for public logs
-- likes and comments by authenticated users
+* users managing their own plants
+* users managing their own care logs
+* public feed reads for public plants and public logs
+* photo reads for public logs
+* likes and comments by authenticated users
 
 ## Future Improvements
 
-Potential next steps:
+Possible next steps:
 
-- account deletion flow
-- delete comment button
-- edit comment support
-- report post/comment
-- user profile pages
-- plant search and filters
-- dashboard stats
-- care streaks
-- plant timeline view
-- better gallery management
-- photo deletion from storage
-- export user data
-- stronger demo seeding flow
-- automated RLS tests
+* account deletion 
+* delete comment button
+* edit comment support
+* report post/comment
+* user profile pages
+* plant search and filters
+* dashboard stats
+* care streaks
+* plant timeline view
+* better gallery management
+* photo deletion from storage
+* export user data
+* stronger demo seeding flow
+* automated RLS tests
 
 ## Why I Built This
 
-AvoLog came from an actual tracking problem: I had multiple avocado seeds at different stages, and the simple version of “plant tracker” stopped being enough.
+AvoLog came from an actual tracking problem: I had too many avocado seeds at too many different stages, and my simple tracker stopped being enough.
 
-Some plants were in water. Some moved to soil. Some had photos. Some split into separate plants. Some care updates belonged in a feed, and some needed to stay private.
+Some plants were in water. Some had moved to soil. Some had photos. Some split into separate plants. Some care updates belonged in a feed. Some needed to stay private.
 
-So the app became a small but real system for modeling plant care as it actually happens: messy, specific, visual, and full of edge cases.
+So the app became a small, real system for modeling plant care as it happens.
