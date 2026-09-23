@@ -11,7 +11,7 @@ import CareLogLikeButton from "@/src/components/CareLogLikeButton";
 import { MessageCircle } from "lucide-react";
 import PhotoCarousel from "@/src/components/PhotoCarousel";
 import LoadingLink from "@/src/components/LoadingLink";
-
+import { redirect } from "next/navigation";
 type FeedCareLog = {
   id: number;
   plant_id: number;
@@ -56,14 +56,27 @@ type FeedCareLog = {
   }[];
 };
 
-export default async function FeedPage() {
+export default async function FeedPage({
+  searchParams, // pull the searchParams property out of the object Next.js passes in
+}: {
+  searchParams: Promise<{ page?: string }>; // describes the type of the object Next.js will pass in
+}) {
+  const params = await searchParams; //get search parameter object
+  const page = Math.max(1, Math.floor(Number(params.page)) || 1); //convert page to a number, default to 1, never allow anything below 1, round down to nearest int
+  const pageSize = 10;
+  const from = (page - 1) * pageSize; // - 1 makes sure that we index starting at 0
+  const to = from + pageSize - 1; // take the starting index and calculate the inclusive end index for 10 records
   const supabase = await createSupabaseServerClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: careLogs, error } = await supabase
+  const {
+    data: careLogs,
+    error,
+    count,
+  } = await supabase
     .from("care_logs")
     .select(
       `
@@ -109,11 +122,19 @@ export default async function FeedPage() {
           )
         )
       `,
+      { count: "exact" },
     )
     .eq("is_private", false)
     .eq("plants.is_private", false)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
+  const totalPages = Math.ceil((count ?? 0) / pageSize);
+  if (totalPages > 0 && page > totalPages) {
+    redirect(`/feed?page=${totalPages}`);
+  }
+
+  `/feed?page=${totalPages}`;
   const typedCareLogs = (careLogs ?? []) as unknown as FeedCareLog[];
 
   return (
@@ -250,6 +271,28 @@ export default async function FeedPage() {
             })}
           </section>
         )}
+
+        <div className="mt-8 flex items-center jsutify-center gap-4">
+          {page > 1 && (
+            <Link
+              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+              href={`/feed?page=${page - 1}`}
+            >
+              ❮
+            </Link>
+          )}
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+              href={`/feed?page=${page + 1}`}
+            >
+              ❯
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );
