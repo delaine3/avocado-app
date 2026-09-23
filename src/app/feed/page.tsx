@@ -127,12 +127,18 @@ export default async function FeedPage({
     .eq("is_private", false)
     .eq("plants.is_private", false)
     .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .range(from, to);
 
   const totalPages = Math.ceil((count ?? 0) / pageSize);
   if (totalPages > 0 && page > totalPages) {
     redirect(`/feed?page=${totalPages}`);
   }
+
+  const visiblePages = Array.from(
+    { length: Math.min(10, totalPages - page + 1) },
+    (_, index) => page + index,
+  );
 
   `/feed?page=${totalPages}`;
   const typedCareLogs = (careLogs ?? []) as unknown as FeedCareLog[];
@@ -271,28 +277,49 @@ export default async function FeedPage({
             })}
           </section>
         )}
-
-        <div className="mt-8 flex items-center jsutify-center gap-4">
-          {page > 1 && (
-            <Link
-              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/feed?page=${page - 1}`}
-            >
-              ❮
-            </Link>
-          )}
-          <span>
-            Page {page} of {totalPages}
-          </span>
-          {page < totalPages && (
-            <Link
-              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/feed?page=${page + 1}`}
-            >
-              ❯
-            </Link>
-          )}
-        </div>
+      </div>
+      <div className="mt-8 flex items-center justify-center gap-4">
+        {page > 1 && (
+          <Link
+            className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+            href={`/feed?page=${page - 1}`}
+          >
+            ❮
+          </Link>
+        )}
+        <span>
+          Page {page} of {totalPages}
+        </span>
+        {page < totalPages && (
+          <Link
+            className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+            href={`/feed?page=${page + 1}`}
+          >
+            ❯
+          </Link>
+        )}
+        {page > 1 && (
+          <Link className="rounded border p-2" href={`/feed?page=${1}`}>
+            1
+          </Link>
+        )}
+        {visiblePages.map((pageNumber) => (
+          <Link
+            className="rounded border p-2"
+            key={pageNumber}
+            href={`/feed?page=${pageNumber}`}
+          >
+            {pageNumber != totalPages ? pageNumber : ""}
+          </Link>
+        ))}
+        {page < totalPages && (
+          <Link
+            className="rounded border p-2"
+            href={`/feed?page=${totalPages}`}
+          >
+            Last
+          </Link>
+        )}
       </div>
     </main>
   );

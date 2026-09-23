@@ -19,11 +19,11 @@ import PhotoCarousel from "@/src/components/PhotoCarousel";
 import CreateChildPlantButton from "@/src/components/CreateChildPlantButton";
 import LoadingLink from "@/src/components/LoadingLink";
 import { createChildPlant } from "../new/actions";
+import Link from "next/link";
 
 interface PlantDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 type PlantWithProfile = Plant & {
@@ -49,15 +49,21 @@ type ChildPlant = {
 
 export default async function PlantDetailPage({
   params,
+  searchParams,
 }: PlantDetailPageProps) {
+  const currPage = await searchParams; //get search parameter object
+  const page = Math.max(1, Math.floor(Number(currPage.page)) || 1); //convert page to a number, default to 1, never allow anything below 1, round down to nearest int
+  const pageSize = 10;
+  const from = (page - 1) * pageSize; // - 1 makes sure that we index starting at 0
+  const to = from + pageSize - 1; // take the starting index and calculate the inclusive end index for 10 records
+  const supabase = await createSupabaseServerClient();
+
   const { id } = await params;
   const plantId = Number(id);
 
   if (Number.isNaN(plantId)) {
     notFound();
   }
-
-  const supabase = await createSupabaseServerClient();
 
   const {
     data: { user },
@@ -105,16 +111,18 @@ export default async function PlantDetailPage({
           created_at
         )
       `,
+      { count: "exact" },
     )
     .eq("plant_id", plantId)
-    .order("action_date", { ascending: false });
+    .order("action_date", { ascending: false })
+    .range(from, to);
 
   if (!isOwner) {
     careLogsQuery = careLogsQuery.eq("is_private", false);
   }
 
   const [
-    { data: careLogs, error: careLogsError },
+    { data: careLogs, error: careLogsError, count },
     { data: allPlants },
     { data: childPlants },
     { data: parentPlant },
@@ -158,6 +166,17 @@ export default async function PlantDetailPage({
     typedPlant.profiles?.full_name ??
     "Unknown";
 
+  const totalPages = Math.ceil((count ?? 0) / pageSize);
+  if (totalPages > 0 && page > totalPages) {
+    redirect(`/plants/${plantId}?page=${totalPages}`);
+  }
+
+  const visiblePages = Array.from(
+    { length: Math.min(10, totalPages - page + 1) },
+    (_, index) => page + index,
+  );
+
+  `/plants/${plantId}?page=${totalPages}`;
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10 page">
       <div className="page-header mb-6"></div>
@@ -300,13 +319,11 @@ export default async function PlantDetailPage({
 
           <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
             <h2 className="text-lg font-semibold">Care History</h2>
-
             {careLogsError && (
               <p className="mt-3 text-red-600">
                 Failed to load care logs: {careLogsError.message}
               </p>
             )}
-
             {typedCareLogs.length === 0 ? (
               <p className="mt-3">No care logs yet.</p>
             ) : (
@@ -390,7 +407,53 @@ export default async function PlantDetailPage({
                   })}
                 </div>
               </div>
-            )}
+            )}{" "}
+            <div className="mt-8 flex items-center justify-center gap-4">
+              {page > 1 && (
+                <Link
+                  className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+                  href={`/plants/${plantId}?page=${page - 1}`}
+                >
+                  ❮
+                </Link>
+              )}
+              <span>
+                Page {page} of {totalPages}
+              </span>
+              {page < totalPages && (
+                <Link
+                  className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+                  href={`/plants/${plantId}?page=${page + 1}`}
+                >
+                  ❯
+                </Link>
+              )}
+              {page > 1 && (
+                <Link
+                  className="rounded border p-2"
+                  href={`/plants/${plantId}?page=${1}`}
+                >
+                  1
+                </Link>
+              )}
+              {visiblePages.map((pageNumber) => (
+                <Link
+                  className="rounded border p-2"
+                  key={pageNumber}
+                  href={`/plants/${plantId}?page=${pageNumber}`}
+                >
+                  {pageNumber}
+                </Link>
+              ))}
+              {page < totalPages && (
+                <Link
+                  className="rounded border p-2"
+                  href={`/plants/${plantId}?page=${totalPages}`}
+                >
+                  Last
+                </Link>
+              )}
+            </div>
           </div>
         </section>
       </div>
