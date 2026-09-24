@@ -84,7 +84,7 @@ export async function GET(req: Request) {
       <h2>Your plants need attention 🥑</h2>
       <p>The following plants have not been tended in 3+ days:</p>
       <ul>${plantListHtml}</ul>
-      <p>Go take care of your squad 🌱</p>
+      <p>Go take care of your plants 🌱</p>
     `,
   });
 

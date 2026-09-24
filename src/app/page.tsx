@@ -8,6 +8,7 @@ import { formatDate, toTitleCase } from "./utilities/format";
 import { redirect } from "next/navigation";
 import LoadingLink from "../components/LoadingLink";
 import Link from "next/link";
+import FilterForm from "../components/FilterForm";
 
 const plantStatusStyles = {
   active: "bg-green-200 text-green-800",
@@ -41,9 +42,17 @@ type PlantWithCareData = Plant & {
 export default async function HomePage({
   searchParams, // pull the searchParams property out of the object Next.js passes in
 }: {
-  searchParams: Promise<{ page?: string }>; // describes the type of the object Next.js will pass in
+  searchParams: Promise<{
+    page?: string;
+    health?: string;
+    status?: string;
+    sort?: string;
+  }>; // describes the type of the object Next.js will pass in
 }) {
   const params = await searchParams; //get search parameter object
+  const sort = params.sort ?? "newest";
+  const healthFilter = params.health;
+  const plantStatus = params.status;
   const page = Math.max(1, Math.floor(Number(params.page)) || 1); //convert page to a number, default to 1, never allow anything below 1, round down to nearest int
   const pageSize = 10;
   const from = (page - 1) * pageSize; // - 1 makes sure that we index starting at 0
@@ -58,16 +67,40 @@ export default async function HomePage({
   if (!user) {
     redirect("/login");
   }
+  let plantsQuery = supabase
+    .from("plants")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id);
 
+  if (healthFilter) {
+    plantsQuery = plantsQuery.eq("health_status", healthFilter);
+  }
+
+  if (plantStatus) {
+    plantsQuery = plantsQuery.eq("plant_status", plantStatus);
+  }
+  if (sort === "name_asc") {
+    plantsQuery = plantsQuery.order("name", { ascending: true });
+  }
+
+  if (sort === "name_desc") {
+    plantsQuery = plantsQuery.order("name", { ascending: false });
+  }
+
+  if (sort === "oldest") {
+    plantsQuery = plantsQuery.order("started_at", { ascending: true });
+  }
+
+  if (sort === "newest") {
+    plantsQuery = plantsQuery.order("started_at", { ascending: false });
+  }
+  plantsQuery = plantsQuery.range(from, to);
   const [
     { data: plants, error, count },
     { data: careLogs, error: careLogsError },
   ] = await Promise.all([
-    supabase
-      .from("plants")
-      .select("*", { count: "exact" })
-      .eq("user_id", user.id)
-      .range(from, to),
+    plantsQuery,
+
     supabase
       .from("care_logs")
       .select(
@@ -92,58 +125,29 @@ export default async function HomePage({
 
   const plantsWithCareData: PlantWithCareData[] = (
     (plants as Plant[] | null) ?? []
-  )
-    .map((plant) => {
-      const plantLogs = typedCareLogs
-        .filter((log) => log.plant_id === plant.id)
-        .sort((a, b) => {
-          const actionDateDifference =
-            new Date(b.action_date).getTime() -
-            new Date(a.action_date).getTime();
+  ).map((plant) => {
+    const plantLogs = typedCareLogs.filter((log) => log.plant_id === plant.id);
+    const mostRecentCareLog = plantLogs[0];
 
-          if (actionDateDifference !== 0) return actionDateDifference;
+    const mostRecentPhotoLog = plantLogs.find(
+      (log) =>
+        log.photo_url ||
+        (log.care_log_photos && log.care_log_photos.length > 0),
+    );
 
-          return (
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-        });
+    const recentPhotoUrl =
+      mostRecentPhotoLog?.care_log_photos?.[0]?.photo_url ??
+      mostRecentPhotoLog?.photo_url ??
+      null;
 
-      const mostRecentCareLog = plantLogs[0];
+    return {
+      ...plant,
+      last_care_date: mostRecentCareLog?.action_date ?? null,
+      most_recent_action: mostRecentCareLog?.action_type ?? null,
+      recent_photo_url: recentPhotoUrl,
+    };
+  });
 
-      const mostRecentPhotoLog = plantLogs.find(
-        (log) =>
-          log.photo_url ||
-          (log.care_log_photos && log.care_log_photos.length > 0),
-      );
-
-      const recentPhotoUrl =
-        mostRecentPhotoLog?.care_log_photos?.[0]?.photo_url ??
-        mostRecentPhotoLog?.photo_url ??
-        null;
-
-      return {
-        ...plant,
-        last_care_date: mostRecentCareLog?.action_date ?? null,
-        most_recent_action: mostRecentCareLog?.action_type ?? null,
-        recent_photo_url: recentPhotoUrl,
-      };
-    })
-    .sort((a, b) => {
-      if (!a.last_care_date && !b.last_care_date) {
-        return a.name.localeCompare(b.name);
-      }
-
-      if (!a.last_care_date) return 1;
-      if (!b.last_care_date) return -1;
-
-      const dateDifference =
-        new Date(b.last_care_date).getTime() -
-        new Date(a.last_care_date).getTime();
-
-      if (dateDifference !== 0) return dateDifference;
-
-      return a.name.localeCompare(b.name);
-    });
   const totalPages = Math.ceil((count ?? 0) / pageSize);
   if (totalPages > 0 && page > totalPages) {
     redirect(`/?page=${totalPages}`);
@@ -166,12 +170,17 @@ export default async function HomePage({
             backgroundColor: "rgba(255, 255, 255, 0.65)",
           }}
         >
+          <FilterForm
+            healthFilter={healthFilter}
+            statusFilter={plantStatus}
+            sort={sort}
+          />
           <div>
             <h1 className="text-4xl font-bold tracking-tight title">
               AvoLog🌱🥑
             </h1>
             <p className="mt-3 text-lg">
-              Track your plant squad, water changes, growth, and photos.
+              Track your plants, water changes, growth, and photos.
             </p>
           </div>
         </div>
@@ -254,7 +263,12 @@ export default async function HomePage({
                     ? toTitleCase(plant.most_recent_action)
                     : "No care logs yet"}
                 </p>
-
+                <p>
+                  Start Date:{" "}
+                  {plant.started_at
+                    ? formatDate(plant.started_at)
+                    : "No care logs yet"}
+                </p>
                 <p>Location: {plant.location ?? "Not set"}</p>
 
                 <p>
@@ -306,7 +320,7 @@ export default async function HomePage({
           {page > 1 && (
             <Link
               className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/?page=${page - 1}`}
+              href={`/?page=${page - 1}&sort=${sort}`}
             >
               ❮
             </Link>
@@ -317,13 +331,16 @@ export default async function HomePage({
           {page < totalPages && (
             <Link
               className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/?page=${page + 1}`}
+              href={`/?page=${page + 1}&sort=${sort}`}
             >
               ❯
             </Link>
           )}
           {page > 1 && (
-            <Link className="rounded border p-2" href={`/?page=${1}`}>
+            <Link
+              className="rounded border p-2"
+              href={`/?page=${1}&sort=${sort}`}
+            >
               1
             </Link>
           )}
@@ -331,13 +348,16 @@ export default async function HomePage({
             <Link
               className="rounded border p-2"
               key={pageNumber}
-              href={`/?page=${pageNumber}`}
+              href={`/?page=${pageNumber}&sort=${sort}`}
             >
               {pageNumber}
             </Link>
           ))}
           {page < totalPages && (
-            <Link className="rounded border p-2" href={`/?page=${totalPages}`}>
+            <Link
+              className="rounded border p-2"
+              href={`/?page=${totalPages}&sort=${sort}`}
+            >
               Last
             </Link>
           )}

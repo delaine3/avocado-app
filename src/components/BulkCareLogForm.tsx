@@ -153,7 +153,7 @@ export default function BulkCareLogForm({ action }: Props) {
                   ? "Watered soil plants, checked leaves, rotated pots..."
                   : careGroup === "water"
                     ? "Changed water, cleaned jars, checked roots..."
-                    : "General update for the plant squad..."
+                    : "General update for the plants..."
               }
             />
           </div>
