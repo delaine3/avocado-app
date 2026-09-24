@@ -9,6 +9,17 @@ import { redirect } from "next/navigation";
 import LoadingLink from "../components/LoadingLink";
 import Link from "next/link";
 
+const plantStatusStyles = {
+  active: "bg-green-200 text-green-800",
+  gifted: "bg-orange-200 text-orange-800",
+  archived: "bg-yellow-200 text-yellow-800",
+};
+const healthStatusStyles = {
+  healthy: "bg-green-200 text-green-800",
+  struggling: "bg-orange-200 text-orange-800",
+  recovering: "bg-yellow-200 text-yellow-800",
+  dead: "bg-gray-300 text-gray-800",
+};
 type CareLogForDashboard = {
   plant_id: number;
   action_type: string;
@@ -203,7 +214,7 @@ export default async function HomePage({
 
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span
-                    className={`inline-block rounded px-2 py-1 text-xs ${
+                    className={`inline-block rounded px-2 py-1 fs-1 ${
                       plant.is_private
                         ? "bg-red-200 text-red-800"
                         : "bg-green-200 text-green-800"
@@ -211,9 +222,22 @@ export default async function HomePage({
                   >
                     {plant.is_private ? "🔒 Private" : "🌍 Public"}
                   </span>
-
-                  <span className="inline-block rounded bg-white/70 px-2 py-1 text-xs text-[#4a2c14]">
+                  <span className="inline-block rounded bg-white/70 px-2 py-1 text-inline-block rounded px-2 py-1 fs-1 text-[#4a2c14]">
                     {plant.in_soil ? "🪴 In soil" : "💧 In water"}
+                  </span>
+                  <span
+                    className={`inline-block rounded px-2 py-1 ${
+                      healthStatusStyles[plant.health_status]
+                    }`}
+                  >
+                    {toTitleCase(plant.health_status)}
+                  </span>{" "}
+                  <span
+                    className={`inline-block rounded px-2 py-1 ${
+                      plantStatusStyles[plant.plant_status]
+                    }`}
+                  >
+                    {toTitleCase(plant.plant_status)}
                   </span>
                 </div>
 

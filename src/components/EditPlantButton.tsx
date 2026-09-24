@@ -121,6 +121,47 @@ export default function EditPlantButton({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label
+                    className="mb-2 block fs-1"
+                    htmlFor={`health_status_${plant.id}`}
+                  >
+                    Health
+                  </label>
+
+                  <select
+                    className="w-full rounded border px-4 py-3 outline-none"
+                    id={`health_status_${plant.id}`}
+                    name="health_status"
+                    defaultValue={plant.health_status}
+                  >
+                    <option value="healthy">Healthy</option>
+                    <option value="struggling">Struggling</option>
+                    <option value="recovering">Recovering</option>
+                    <option value="dead">Dead</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    className="mb-2 block font-medium"
+                    htmlFor={`plant_status_${plant.id}`}
+                  >
+                    Plant Status
+                  </label>
+
+                  <select
+                    className="w-full rounded border px-4 py-3 outline-none"
+                    id={`plant_status_${plant.id}`}
+                    name="plant_status"
+                    defaultValue={plant.plant_status}
+                  >
+                    <option value="active">Active</option>
+                    <option value="gifted">Gifted</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+              </div>
               <ContainerTypeahead defaultValue={plant.container_type} />
 
               <div>

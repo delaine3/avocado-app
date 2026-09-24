@@ -165,11 +165,26 @@ export async function updatePlant(
   const notes = formData.get("notes")?.toString().trim() || null;
   const isPrivate = formData.get("is_private") === "on";
   const inSoil = formData.get("in_soil") === "on";
+  const healthStatus = formData.get("health_status")?.toString().trim();
+  var plantStatus = formData.get("plant_status")?.toString().trim();
 
+  const validHealthStatuses = ["healthy", "struggling", "recovering", "dead"];
+
+  const validPlantStatuses = ["active", "gifted", "archived"];
+
+  if (!healthStatus || !validHealthStatuses.includes(healthStatus)) {
+    return { ok: false, message: "Invalid health status" };
+  }
+
+  if (!plantStatus || !validPlantStatuses.includes(plantStatus)) {
+    return { ok: false, message: "Invalid plant status" };
+  }
   if (!plantId || !name) {
     return { ok: false, message: "Plant ID and name are required." };
   }
-
+  if (healthStatus == "dead") {
+    plantStatus = "archived";
+  }
   const { error } = await supabase
     .from("plants")
     .update({
@@ -181,6 +196,8 @@ export async function updatePlant(
       notes,
       is_private: isPrivate,
       in_soil: inSoil,
+      health_status: healthStatus,
+      plant_status: plantStatus,
     })
     .eq("id", Number(plantId));
 
