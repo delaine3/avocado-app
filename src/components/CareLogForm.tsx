@@ -54,7 +54,7 @@ export default function CareLogForm({ plantId, plantStage }: CareLogFormProps) {
           type="date"
           required
           defaultValue={new Date().toISOString().split("T")[0]}
-          className="w-full rounded border px-4 py-3 outline-none"
+          className="block w-full min-w-0 max-w-full rounded border px-4 py-3 outline-none"
         />
       </div>
 

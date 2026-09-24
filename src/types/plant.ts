@@ -26,4 +26,6 @@ export interface Plant {
   in_soil: boolean;
   parent_plant_id: number | null;
   most_recent_action: CareActionType | string;
+  health_status: "healthy" | "struggling" | "recovering" | "dead";
+  plant_status: "active" | "gifted" | "archived";
 }

@@ -204,12 +204,12 @@ export default async function PlantDetailPage({
         </div>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Stage</h2>
             <p className="mt-2">{toTitleCase(typedPlant.stage)}</p>
           </div>
 
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Started</h2>
             <p className="mt-2">
               {typedPlant.started_at
@@ -218,26 +218,26 @@ export default async function PlantDetailPage({
             </p>
           </div>
 
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Location</h2>
             <p className="mt-2">{typedPlant.location ?? "Not set"}</p>
           </div>
 
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Visibility</h2>
             <p className="mt-2">
               {typedPlant.is_private ? "🔒 Private" : "🌍 Public"}
             </p>
           </div>
 
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Care Mode</h2>
             <p className="mt-2">
               {typedPlant.in_soil ? "🪴 In soil" : "💧 In water"}
             </p>
           </div>
 
-          <div className="rounded border p-5">
+          <div className="rounded border p-2">
             <h2 className="text-lg font-semibold">Container Type</h2>
             <p className="mt-2">
               {typedPlant.container_type
@@ -245,15 +245,18 @@ export default async function PlantDetailPage({
                 : "Not set"}
             </p>
           </div>
-
-          <div className="rounded border p-5">
-            <h2 className="text-lg font-semibold">Created</h2>
-            <p className="mt-2">{formatDate(typedPlant.created_at)}</p>
+          <div className="rounded border p-2">
+            <h2 className="text-lg font-semibold">Health Status</h2>
+            <p className="mt-2">{toTitleCase(typedPlant.health_status)}</p>
+          </div>
+          <div className="rounded border p-2">
+            <h2 className="text-lg font-semibold"> Status</h2>
+            <p className="mt-2">{toTitleCase(typedPlant.plant_status)}</p>
           </div>
         </section>
 
         {typedChildPlants.length > 0 && (
-          <section className="mt-8 rounded border p-5">
+          <section className="mt-8 rounded border p-2">
             <h2 className="text-lg font-semibold">Child Plants</h2>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -288,7 +291,7 @@ export default async function PlantDetailPage({
           }`}
         >
           {isOwner && (
-            <div className="rounded border p-5">
+            <div className="rounded border p-2">
               <h2 className="text-lg font-semibold">Add Care Log</h2>
 
               <CareLogForm
@@ -298,7 +301,7 @@ export default async function PlantDetailPage({
             </div>
           )}
 
-          <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-5">
+          <div className="flex flex-col rounded border p-4 sm:h-[32rem] sm:p-2">
             <h2 className="text-lg font-semibold">Care History</h2>
 
             {careLogsError && (
