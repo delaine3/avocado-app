@@ -7,6 +7,7 @@ import EditPlantButton from "../components/EditPlantButton";
 import { formatDate, toTitleCase } from "./utilities/format";
 import { redirect } from "next/navigation";
 import LoadingLink from "../components/LoadingLink";
+import Link from "next/link";
 
 const plantStatusStyles = {
   active: "bg-green-200 text-green-800",
@@ -37,7 +38,17 @@ type PlantWithCareData = Plant & {
   recent_photo_url: string | null;
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams, // pull the searchParams property out of the object Next.js passes in
+}: {
+  searchParams: Promise<{ page?: string }>; // describes the type of the object Next.js will pass in
+}) {
+  const params = await searchParams; //get search parameter object
+  const page = Math.max(1, Math.floor(Number(params.page)) || 1); //convert page to a number, default to 1, never allow anything below 1, round down to nearest int
+  const pageSize = 10;
+  const from = (page - 1) * pageSize; // - 1 makes sure that we index starting at 0
+  const to = from + pageSize - 1; // take the starting index and calculate the inclusive end index for 10 records
+
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -48,13 +59,19 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  const [{ data: plants, error }, { data: careLogs, error: careLogsError }] =
-    await Promise.all([
-      supabase.from("plants").select("*").eq("user_id", user.id),
-      supabase
-        .from("care_logs")
-        .select(
-          `
+  const [
+    { data: plants, error, count },
+    { data: careLogs, error: careLogsError },
+  ] = await Promise.all([
+    supabase
+      .from("plants")
+      .select("*", { count: "exact" })
+      .eq("user_id", user.id)
+      .range(from, to),
+    supabase
+      .from("care_logs")
+      .select(
+        `
           plant_id,
           action_type,
           action_date,
@@ -65,11 +82,11 @@ export default async function HomePage() {
             photo_url
           )
         `,
-        )
-        .eq("user_id", user.id)
-        .order("action_date", { ascending: false })
-        .order("created_at", { ascending: false }),
-    ]);
+      )
+      .eq("user_id", user.id)
+      .order("action_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ]);
 
   const typedCareLogs = (careLogs ?? []) as CareLogForDashboard[];
 
@@ -127,7 +144,17 @@ export default async function HomePage() {
 
       return a.name.localeCompare(b.name);
     });
+  const totalPages = Math.ceil((count ?? 0) / pageSize);
+  if (totalPages > 0 && page > totalPages) {
+    redirect(`/?page=${totalPages}`);
+  }
 
+  const visiblePages = Array.from(
+    {
+      length: Math.min(10, Math.max(0, totalPages - page - 1)),
+    },
+    (_, index) => page + index + 1,
+  );
   return (
     <main className="min-h-screen p-4 sm:p-8 page">
       <div className="mx-auto max-w-5xl">
@@ -148,19 +175,16 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-
         {error && (
           <div className="mt-8 rounded border border-red-200 bg-red-50 p-5 text-red-700">
             Failed to load plants: {error.message}
           </div>
         )}
-
         {careLogsError && (
           <div className="mt-8 rounded border border-red-200 bg-red-50 p-5 text-red-700">
             Failed to load care logs: {careLogsError.message}
           </div>
         )}
-
         <section className="mt-10 grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plantsWithCareData.map((plant) => (
             <div
@@ -277,7 +301,47 @@ export default async function HomePage() {
               </div>
             </div>
           ))}
-        </section>
+        </section>{" "}
+        <div className="mt-8 flex items-center justify-center gap-4">
+          {page > 1 && (
+            <Link
+              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+              href={`/?page=${page - 1}`}
+            >
+              ❮
+            </Link>
+          )}
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link
+              className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
+              href={`/?page=${page + 1}`}
+            >
+              ❯
+            </Link>
+          )}
+          {page > 1 && (
+            <Link className="rounded border p-2" href={`/?page=${1}`}>
+              1
+            </Link>
+          )}
+          {visiblePages.map((pageNumber) => (
+            <Link
+              className="rounded border p-2"
+              key={pageNumber}
+              href={`/?page=${pageNumber}`}
+            >
+              {pageNumber}
+            </Link>
+          ))}
+          {page < totalPages && (
+            <Link className="rounded border p-2" href={`/?page=${totalPages}`}>
+              Last
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );
