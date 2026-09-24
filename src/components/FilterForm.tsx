@@ -10,6 +10,8 @@ export default function FilterForm({
 }: FilterFormProps) {
   return (
     <details className="relative mt-6">
+      <summary className="cursor-pointer rounded bg-[#4a2c14] px-4 py-2 text-white"></summary>
+
       <form
         method="GET"
         className="absolute z-10 mt-2 flex min-w-64 flex-col gap-3 rounded border bg-white p-4 shadow-lg"
