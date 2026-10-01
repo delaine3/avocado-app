@@ -2,10 +2,12 @@ type FilterFormProps = {
   healthFilter?: string;
   statusFilter?: string;
   sort?: string;
+  inSoil?: string;
 };
 export default function FilterForm({
   statusFilter,
   healthFilter,
+  inSoil,
   sort,
 }: FilterFormProps) {
   return (
@@ -57,7 +59,18 @@ export default function FilterForm({
             <option value="archived">Archived</option>
           </select>
         </label>
-
+        <label>
+          In Soil
+          <select
+            name="in_soil"
+            defaultValue={inSoil ?? ""}
+            className="mt-1 w-full rounded border px-3 py-2"
+          >
+            <option value="">All plants</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </label>
         <button
           type="submit"
           className="rounded bg-[#4a2c14] px-4 py-2 text-white"

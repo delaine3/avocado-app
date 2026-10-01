@@ -164,7 +164,7 @@ export async function updatePlant(
     formData.get("container_type")?.toString().trim() || null;
   const notes = formData.get("notes")?.toString().trim() || null;
   const isPrivate = formData.get("is_private") === "on";
-  const inSoil = formData.get("in_soil") === "on";
+  var inSoil = formData.get("in_soil") === "on";
   const healthStatus = formData.get("health_status")?.toString().trim();
   var plantStatus = formData.get("plant_status")?.toString().trim();
 
@@ -185,6 +185,10 @@ export async function updatePlant(
   if (healthStatus == "dead") {
     plantStatus = "archived";
   }
+  if (containerType !== "water_glass") {
+    inSoil = true;
+  }
+
   const { error } = await supabase
     .from("plants")
     .update({
@@ -214,33 +218,9 @@ export async function updatePlant(
 function containerIsSoil(containerType: string | null) {
   if (!containerType) return false;
 
-  return [
-    "small_pot",
-    "medium_pot",
-    "large_pot",
-    "terracotta_pot",
-    "ceramic_pot",
-    "plastic_pot",
-    "planter_box",
-    "grow_bag",
-    "outdoor_ground",
-    "raised_bed",
-  ].includes(containerType);
+  return ["pot", "grow_bag", "outdoor_ground"].includes(containerType);
 }
 
-function stageFromContainer(containerType: string | null) {
-  if (!containerType) return null;
-
-  if (containerType === "outdoor_ground" || containerType === "raised_bed") {
-    return "outdoor";
-  }
-
-  if (containerIsSoil(containerType)) {
-    return "potted";
-  }
-
-  return null;
-}
 //Create Care Log for all plants
 export async function createCareLogForAllPlants(
   _prevState: ActionResult | null,
@@ -430,20 +410,16 @@ export async function createCareLog(
   }
 
   if (actionType === "repotted" && containerType) {
-    const nextStage = stageFromContainer(containerType);
-
     const plantUpdatePayload: {
       container_type: string;
       in_soil: boolean;
       stage?: string;
+      location?: string;
     } = {
       container_type: containerType,
       in_soil: containerIsSoil(containerType),
+      location: "",
     };
-
-    if (nextStage) {
-      plantUpdatePayload.stage = nextStage;
-    }
 
     const { error: plantUpdateError } = await supabase
       .from("plants")
