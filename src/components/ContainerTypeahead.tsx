@@ -4,10 +4,7 @@ import TypeaheadSelect from "./TypeaheadSelect";
 
 const containerTypeOptions = [
   { value: "water_glass", label: "Water Glass" },
-  { value: "small_pot", label: "Small Pot" },
-  { value: "medium_pot", label: "Medium Pot" },
-  { value: "large_pot", label: "Large Pot" },
-  { value: "planter_box", label: "Planter Box" },
+  { value: "pot", label: "Pot" },
   { value: "grow_bag", label: "Grow Bag" },
   { value: "outdoor_ground", label: "Outdoor Ground" },
 ];

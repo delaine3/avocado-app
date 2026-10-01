@@ -47,11 +47,23 @@ export default async function HomePage({
     health?: string;
     status?: string;
     sort?: string;
+    in_soil?: string;
   }>; // describes the type of the object Next.js will pass in
 }) {
   const params = await searchParams; //get search parameter object
+  const buildPageHref = (newPage: number) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        query.set(key, value);
+      }
+    });
+    query.set("page", String(newPage));
+    return `/?${query.toString()}`;
+  };
   const sort = params.sort ?? "newest";
   const healthFilter = params.health;
+  const inSoil = params.in_soil;
   const plantStatus = params.status;
   const page = Math.max(1, Math.floor(Number(params.page)) || 1); //convert page to a number, default to 1, never allow anything below 1, round down to nearest int
   const pageSize = 10;
@@ -75,7 +87,12 @@ export default async function HomePage({
   if (healthFilter) {
     plantsQuery = plantsQuery.eq("health_status", healthFilter);
   }
-
+  if (inSoil == "true") {
+    plantsQuery = plantsQuery.eq("in_soil", inSoil);
+  }
+  if (inSoil == "false") {
+    plantsQuery = plantsQuery.eq("in_soil", inSoil);
+  }
   if (plantStatus) {
     plantsQuery = plantsQuery.eq("plant_status", plantStatus);
   }
@@ -320,7 +337,7 @@ export default async function HomePage({
           {page > 1 && (
             <Link
               className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/?page=${page - 1}&sort=${sort}`}
+              href={buildPageHref(page - 1)}
             >
               ❮
             </Link>
@@ -331,16 +348,13 @@ export default async function HomePage({
           {page < totalPages && (
             <Link
               className="rounded-lg bg-[#4a2c14] px-4 py-2 text-lg text-white"
-              href={`/?page=${page + 1}&sort=${sort}`}
+              href={buildPageHref(page + 1)}
             >
               ❯
             </Link>
           )}
           {page > 1 && (
-            <Link
-              className="rounded border p-2"
-              href={`/?page=${1}&sort=${sort}`}
-            >
+            <Link className="rounded border p-2" href={buildPageHref(1)}>
               1
             </Link>
           )}
@@ -348,7 +362,7 @@ export default async function HomePage({
             <Link
               className="rounded border p-2"
               key={pageNumber}
-              href={`/?page=${pageNumber}&sort=${sort}`}
+              href={buildPageHref(pageNumber)}
             >
               {pageNumber}
             </Link>
@@ -356,7 +370,7 @@ export default async function HomePage({
           {page < totalPages && (
             <Link
               className="rounded border p-2"
-              href={`/?page=${totalPages}&sort=${sort}`}
+              href={buildPageHref(totalPages)}
             >
               Last
             </Link>
